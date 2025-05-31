@@ -1,10 +1,12 @@
 import streamlit as st
 import joblib
 import numpy as np
+import os
 
-# Load the saved model
-model = joblib.load("savedmodel/saved_model.pkl")
-
+# Load the saved model using an absolute path
+model_path = os.path.join(os.path.dirname(__file__), '..', 'savedmodel', 'saved_model.pkl')
+model_path = os.path.abspath(model_path)  # optional: make it absolute path
+model = joblib.load(model_path)
 
 st.title("Iris Flower Species Prediction")
 
