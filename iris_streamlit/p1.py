@@ -6,7 +6,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 
 st.sidebar.title("Let's Explore the Iris Dataset")
-split_bar = st.sidebar.slider("Split the dataset", 0.1, 0.9, 0.2)
+split_bar = st.sidebar.slider("Test Size", 0.1, 0.9, 0.2)
 
 
 def load_data():
