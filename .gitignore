@@ -1,24 +1,22 @@
-# Ignore virtual environment
+# Virtual environment folder
 venv/
-
-# Ignore Python cache files
+.env/
 __pycache__/
 *.pyc
-*.pyo
-*.pyd
 
-# VS Code settings (optional)
-.vscode/
+# Streamlit cache (optional)
+.streamlit/
 
-# Jupyter Notebook checkpoints
-.ipynb_checkpoints/
-
-# Environment and config files
-.env
-*.env
-
-# OS-specific files
+# OS generated files
 .DS_Store
 Thumbs.db
-venv/
-savedmodel/
+
+# Python egg info
+*.egg-info/
+
+# Logs and databases
+*.log
+*.sqlite3
+
+# IDE files (VS Code)
+.vscode/
