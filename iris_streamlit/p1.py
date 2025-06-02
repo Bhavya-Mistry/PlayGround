@@ -3,42 +3,58 @@ import numpy as np
 import pandas as pd
 from sklearn import datasets
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score
+from sklearn.metrics import accuracy_score, confusion_matrix
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.svm import SVC
+from sklearn.ensemble import RandomForestClassifier
+import matplotlib.pyplot as plt
+import seaborn as sns
 
-st.sidebar.title("Let's Explore the Iris Dataset")
-split_bar = st.sidebar.slider("Test Size", 0.1, 0.9, 0.2)
+st.title("🌸 Iris Classifier Explorer")
+
+preview = st.checkbox("Show Data Preview")
 
 
-def load_data():
-    iris = datasets.load_iris()
-    return iris.data, iris.target
+dataset = datasets.load_iris()
+X = dataset.data
+y = dataset.target
 
-def split(split_bar):
-    X, y = load_data()
-    return train_test_split(X, y, test_size=split_bar, random_state=42)
+df = pd.DataFrame(X, columns=dataset.feature_names)
 
-def train_model(classifier, X_train, y_train):
-    if classifier == "KNN":
-        from sklearn.neighbors import KNeighborsClassifier
-        model = KNeighborsClassifier()
-    elif classifier == "SVM":
-        from sklearn.svm import SVC
-        model = SVC()
-    elif classifier == "Random Forest":
-        from sklearn.ensemble import RandomForestClassifier
-        model = RandomForestClassifier()
-    model.fit(X_train, y_train)
-    return model
+features = dataset.feature_names
+class_names = dataset.target_names
 
-# Sidebar UI
-classifier = st.sidebar.selectbox("Select classifier", ["KNN", "SVM", "Random Forest"])
-train_button = st.sidebar.button("Let's Start")
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.4, random_state=42)
 
-# Train + Evaluate
-if train_button:
-    X_train, X_test, y_train, y_test = split(split_bar)
-    model = train_model(classifier, X_train, y_train)
+if preview:
+    st.dataframe(df)
+
+classifier = st.selectbox("Select Classifier", ["KNN", "SVM", "Random Forest"])
+
+if classifier == "KNN":
+    model = KNeighborsClassifier()
+elif classifier == "SVM":
+    model = SVC()  
+elif classifier == "Random Forest":
+    model = RandomForestClassifier()
+
+train = st.button("Train Model")
+if train:
+    model.fit(X_train, y_train)    
     y_pred = model.predict(X_test)
-    acc = accuracy_score(y_test, y_pred)
-    st.success(f"Model trained successfully with {classifier}!")
-    st.write(f"Accuracy of the model: **{acc:.2f}**")
+    accuracy = accuracy_score(y_test, y_pred)
+    st.write(f"Accuracy: {accuracy:.2f}")
+    # Display confusion matrix
+    cm = confusion_matrix(y_test, y_pred)
+    plt.figure(figsize=(10, 6))
+    sns.heatmap(cm, annot=True, fmt='d', cmap='Greens', xticklabels=class_names, yticklabels=class_names)
+    plt.xlabel("Predicted")
+    plt.ylabel("Actual")
+    st.pyplot(plt.gcf())
+    
+    from sklearn.metrics import classification_report
+
+    report = classification_report(y_test, y_pred, target_names=class_names, output_dict=True)
+    report_df = pd.DataFrame(report).transpose()
+    st.subheader("Classification Report")
+    st.dataframe(report_df)
