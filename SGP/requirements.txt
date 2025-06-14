@@ -1,0 +1,10 @@
+fastapi
+uvicorn[standard]
+pydantic
+pydantic-settings
+sentence-transformers
+spacy
+textblob
+requests
+streamlit
+numpy
