@@ -90,7 +90,7 @@ def generate_list_items(options, min_items, max_items):
     return random.sample(options, min(num_items, len(options)))
 
 # Number of synthetic student profiles to generate
-num_students = 1000
+num_students = 10
 
 data = []
 
@@ -194,3 +194,5 @@ print(df.head())
 csv_file_path = "data/synthetic_career_data.csv"
 df.to_csv(csv_file_path, index=False)
 print(f"\nSynthetic dataset saved to {csv_file_path}")
+
+print(df.columns)
