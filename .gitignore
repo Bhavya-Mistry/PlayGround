@@ -20,3 +20,8 @@ Thumbs.db
 
 # IDE files (VS Code)
 .vscode/
+
+
+#keys
+
+.env
