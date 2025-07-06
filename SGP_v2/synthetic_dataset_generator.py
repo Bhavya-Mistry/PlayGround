@@ -191,7 +191,7 @@ print("Generated Synthetic Dataset Sample:")
 print(df.head())
 
 # Save the dataset to a CSV file inside the 'data' directory
-csv_file_path = "data/synthetic_career_data.csv"
+csv_file_path = "SGP_v2\data\synthetic_career_data.csv"
 df.to_csv(csv_file_path, index=False)
 print(f"\nSynthetic dataset saved to {csv_file_path}")
 
