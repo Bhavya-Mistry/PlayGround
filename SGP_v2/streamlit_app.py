@@ -64,10 +64,10 @@ st.set_page_config(layout="wide", page_title="AI-Powered Career Navigator")
 # --- Load Pre-trained Model and Preprocessors ---
 # The paths are relative to where streamlit_app.py is run
 try:
-    mlb = joblib.load('models/mlb.pkl')
-    model_pipeline = joblib.load('models/model_pipeline.pkl')
+    mlb = joblib.load('SGP_v2\models\mlb.pkl')
+    model_pipeline = joblib.load('SGP_v2\models\model_pipeline.pkl')
     # NEW: Load pre-computed student embeddings and Sentence-BERT model
-    student_embeddings = np.load('models/student_embeddings.npy')
+    student_embeddings = np.load('SGP_v2\models\student_embeddings.npy')
     # Re-instantiate SentenceTransformer. It will download if not cached locally.
     sentence_model = SentenceTransformer('all-MiniLM-L6-v2')
 

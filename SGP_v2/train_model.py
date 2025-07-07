@@ -58,7 +58,7 @@ class CategoricalColumnTransformer(BaseEstimator, TransformerMixin):
         return X[[self.column]]
 
 # --- Load Data ---
-csv_file_path = "data/synthetic_career_data.csv"
+csv_file_path = "SGP_v2\data\synthetic_career_data.csv"
 try:
     df = pd.read_csv(csv_file_path)
     print(f"Dataset loaded from {csv_file_path}")
@@ -113,7 +113,7 @@ print(f"Generated embeddings shape: {student_embeddings.shape}")
 os.makedirs('models', exist_ok=True)
 
 # Save the embeddings to a .npy file
-np.save('models/student_embeddings.npy', student_embeddings)
+np.save('SGP_v2\models\student_embeddings.npy', student_embeddings)
 print("Student embeddings saved to 'models/student_embeddings.npy'.")
 
 # --- Feature Engineering and Preprocessing Pipeline ---
@@ -169,6 +169,6 @@ print(f"Precision Score (Micro): {precision_score(y_test, y_pred, average='micro
 print(f"Recall Score (Micro): {recall_score(y_test, y_pred, average='micro'):.4f}")
 
 # --- Save Model and Preprocessors ---
-joblib.dump(mlb, 'models/mlb.pkl')
-joblib.dump(model_pipeline, 'models/model_pipeline.pkl')
-print("\nModel pipeline and MultiLabelBinarizer saved to 'models/' directory.")
+joblib.dump(mlb, 'SGP_v2\models\mlb.pkl')
+joblib.dump(model_pipeline, 'SGP_v2\models\model_pipeline.pkl')
+print("\nModel pipeline and MultiLabelBinarizer saved to 'SGP_v2\models\' directory.")
