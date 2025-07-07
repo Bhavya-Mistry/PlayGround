@@ -1,12 +1,20 @@
 import pandas as pd
 
-df = pd.read_csv(r"career-navigator\v1\data\final_sample_dataset_1.csv")
+df = pd.read_csv(r"career-navigator\v1\data\dataset.csv")
+print(df.columns.tolist())
 
 
 df.columns
-multi_label_cols = ['Interest_Areas', 'Soft_Skills', 'Programming_Languages',
-                    'Tools_and_Techstack', 'Current_Certifications',
-                    'Extracurricular_Interests', 'Favourite_Subjects']
+multi_label_cols = [
+    'Interest_Areas',
+    'Soft_Skills',
+    'Programming_Languages',
+    'Tools_Techstack',  # <-- ✅ fixed
+    'Certifications',   # <-- ✅ match with actual column name
+    'Extracurricular_Interests',
+    'Favourite_Subjects'
+]
+
 
 
 from sklearn.preprocessing import MultiLabelBinarizer, LabelEncoder, StandardScaler
@@ -19,7 +27,7 @@ import numpy as np
 
 # Utility: split multi-label strings
 def split_multi_label(col):
-    return col.apply(lambda x: [i.strip() for i in x.split(',') if i.strip()])
+    return col.fillna('').apply(lambda x: [i.strip() for i in x.split(',') if i.strip()])
 
 # 1. Encode all multi-label columns
 def encode_multi_label(df, cols):

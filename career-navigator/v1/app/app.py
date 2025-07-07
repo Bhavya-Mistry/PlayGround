@@ -27,7 +27,7 @@ masters = st.radio("Do you want to go for Masters?", ["Yes", "No"])
 research = st.radio("Interested in Research?", ["Yes", "No"])
 
 # Numeric inputs
-cgpa = st.slider("Current CGPA", 4.0, 10.0, 7.5, 0.1)
+cgpa = st.slider("Current CGPA", 2.0, 10.0, 7.5, 0.1)
 projects = st.number_input("Current Projects Count", min_value=0, step=1)
 internships = st.number_input("Internship Duration (in months)", min_value=0, step=1)
 
