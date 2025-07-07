@@ -10,8 +10,8 @@ Below is a candidate's resume:
 ------------------------------
 
 1. Summarize the candidate's background in 2–3 lines.
-2. Rate the resume's relevance to the role of {job_role} on a scale of 1 to 10.
-3. Suggest 2 improvements to better match this role.
+2. Rate the resume's relevance to the role of {job_role} on a scale of 1 to 100.
+3. Suggest 1 improvement to better match this role.
 
 Return the result in this format:
 - Summary:
