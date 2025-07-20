@@ -1,5 +1,5 @@
 import streamlit as st
-from resume_parser import parse_resume
+from app.resume_parser import parse_resume
 from gemini_handler import get_gemini_response
 from prompts import build_ats_prompt
 
