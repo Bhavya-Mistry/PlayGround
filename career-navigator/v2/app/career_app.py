@@ -20,9 +20,9 @@ def run():
     mlb_dict = joblib.load(os.path.join(MODEL_DIR, "mlb_dict.pkl"))
     label_encoder = joblib.load(os.path.join(MODEL_DIR, "label_encoder.pkl"))
 
-    from resume_parser import parse_resume
-    from prompts import build_ats_prompt
-    from gemini_handler import get_gemini_response
+    from .resume_parser import parse_resume
+    from .prompts import build_ats_prompt
+    from .gemini_handler import get_gemini_response
     import plotly.graph_objects as go
 
     st.set_page_config(page_title="Career Navigator", layout="wide", page_icon="🚀")
@@ -191,28 +191,6 @@ def run():
                 for item in resources:
                     st.markdown(f"- {item}")
 
-    # --- ATS Resume Parsing & Scoring Section ---
-    ats_col1, ats_col2, ats_col3 = st.columns([1,1,1])
-    with ats_col2:
-        show_ats = st.button("📝 ATS Resume Check", key="show_ats_button", use_container_width=True)
-    if show_ats:
-        st.header("ATS Resume Parsing & Score")
-        st.markdown("Upload your resume and check how it performs against your target job role.")
-        uploaded_file = st.file_uploader("Upload your Resume (PDF or DOCX)", type=["pdf", "docx"], key="ats_resume")
-        job_role = st.text_input("Target Job Role for ATS", value="Software Engineer", key="ats_job_role")
-        if uploaded_file and st.button("Parse & Score Resume", key="ats_button", use_container_width=True):
-            with st.spinner("Reading your resume..."):
-                resume_text = parse_resume(uploaded_file)
-            if resume_text.startswith("Unsupported"):
-                st.error(resume_text)
-            else:
-                st.subheader("Extracted Resume Text")
-                st.text_area("Preview", resume_text, height=250)
-                with st.spinner("Sending to Gemini for evaluation..."):
-                    prompt = build_ats_prompt(resume_text, job_role)
-                    result = get_gemini_response(prompt)
-                st.subheader("ATS Evaluation Result")
-                st.markdown(result)
 
     # st.markdown("""<div class='main-title'>🚀 AI-Powered Career Navigator</div>""", unsafe_allow_html=True)
     # st.markdown("""<div class='intro-text'>Fill in your academic, technical, and personal interests to receive your personalized career prediction.</div>""", unsafe_allow_html=True)

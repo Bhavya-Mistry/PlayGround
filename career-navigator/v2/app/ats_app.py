@@ -1,7 +1,7 @@
 import streamlit as st
-from app.resume_parser import parse_resume
-from app.gemini_handler import get_gemini_response
-from app.prompts import build_ats_prompt
+from .resume_parser import parse_resume
+from .gemini_handler import get_gemini_response
+from .prompts import build_ats_prompt
 
 def run():
     # st.set_page_config(page_title="Smart ATS Resume Evaluator", layout="centered")
