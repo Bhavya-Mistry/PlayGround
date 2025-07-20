@@ -9,9 +9,13 @@ from streamlit.components.v1 import html
 
 def run():
     # Load trained components
-    model = joblib.load("v2/saved-models/career_model.pkl")
-    mlb_dict = joblib.load("v2/saved-models/mlb_dict.pkl")
-    label_encoder = joblib.load("v2/saved-models/label_encoder.pkl")
+    model = joblib.load("../saved-models/career_model.pkl")
+    mlb_dict = joblib.load("../saved-models/mlb_dict.pkl")
+    label_encoder = joblib.load("../saved-models/label_encoder.pkl")
+
+    from resume_parser import parse_resume
+    from prompts import build_ats_prompt
+    from gemini_handler import get_gemini_response
 
     st.markdown("""
         <style>
@@ -132,3 +136,25 @@ def run():
                     st.markdown(f"**{role} Resources:**")
                     for item in resource_map[role]:
                         st.markdown(f"- {item}")
+
+    # --- ATS Resume Parsing & Scoring Section ---
+    st.header("Resume Parsing & ATS Score")
+    uploaded_file = st.file_uploader("Upload your Resume (PDF or DOCX)", type=["pdf", "docx"], key="ats_resume")
+    job_role = st.text_input("Target Job Role for ATS", value="Software Engineer", key="ats_job_role")
+    if uploaded_file and st.button("Parse & Score Resume", key="ats_button"):
+        with st.spinner("Reading your resume..."):
+            resume_text = parse_resume(uploaded_file)
+        if resume_text.startswith("Unsupported"):
+            st.error(resume_text)
+        else:
+            st.subheader("Extracted Resume Text")
+            st.text_area("Preview", resume_text, height=250)
+            with st.spinner("Sending to Gemini for evaluation..."):
+                prompt = build_ats_prompt(resume_text, job_role)
+                result = get_gemini_response(prompt)
+            st.subheader("ATS Evaluation Result")
+            st.markdown(result)
+
+
+if __name__ == "__main__":
+    run()
