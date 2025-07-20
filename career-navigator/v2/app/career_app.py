@@ -4,14 +4,21 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from streamlit.components.v1 import html
+import os
+import joblib
 
 # st.set_page_config(page_title="AI-Powered Career Navigator", layout="wide")
 
 def run():
     # Load trained components
-    model = joblib.load("../saved-models/career_model.pkl")
-    mlb_dict = joblib.load("../saved-models/mlb_dict.pkl")
-    label_encoder = joblib.load("../saved-models/label_encoder.pkl")
+    
+
+    BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    MODEL_DIR = os.path.join(BASE_DIR, "saved-models")
+
+    model = joblib.load(os.path.join(MODEL_DIR, "career_model.pkl"))
+    mlb_dict = joblib.load(os.path.join(MODEL_DIR, "mlb_dict.pkl"))
+    label_encoder = joblib.load(os.path.join(MODEL_DIR, "label_encoder.pkl"))
 
     from resume_parser import parse_resume
     from prompts import build_ats_prompt
