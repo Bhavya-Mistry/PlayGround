@@ -8,3 +8,6 @@ pdfplumber
 python-docx
 google-generativeai
 python-dotenv
+plotly
+fastapi
+uvicorn
