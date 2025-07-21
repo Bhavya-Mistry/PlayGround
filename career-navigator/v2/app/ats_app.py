@@ -17,15 +17,51 @@ def run():
         if resume_text.startswith("Unsupported"):
             st.error(resume_text)
         else:
-            st.subheader("📃 Extracted Resume Text")
-            st.text_area("Preview", resume_text, height=250)
+            # --- Beautiful Resume Preview ---
+            with st.expander("📃 Show Extracted Resume Text", expanded=False):
+                st.text_area("Resume Preview", resume_text, height=200)
 
             with st.spinner("Sending to Gemini for evaluation..."):
                 prompt = build_ats_prompt(resume_text, job_role)
                 result = get_gemini_response(prompt)
 
-            st.subheader("✅ ATS Evaluation")
-            st.markdown(result)
+            # --- Parse Gemini Result for Pretty Output ---
+            summary, score, suggestions = "", "", ""
+            import re
+            summary_match = re.search(r"Summary:\s*(.*)", result)
+            score_match = re.search(r"Score.*?:\s*(\d+)", result)
+            suggestions_match = re.search(r"Suggestions?:\s*(.*)", result)
+            if summary_match:
+                summary = summary_match.group(1).strip()
+            if score_match:
+                score = int(score_match.group(1))
+            if suggestions_match:
+                suggestions = suggestions_match.group(1).strip()
+
+            # --- ATS Score Gauge ---
+            import plotly.graph_objects as go
+            gauge_color = "#26a69a" if score and score >= 8 else ("#ffa726" if score and score >= 5 else "#ef5350")
+            fig = go.Figure(go.Indicator(
+                mode = "gauge+number",
+                value = score if score else 0,
+                domain = {'x': [0, 1], 'y': [0, 1]},
+                title = {'text': "ATS Score (out of 10)"},
+                gauge = {
+                    'axis': {'range': [0, 10]},
+                    'bar': {'color': gauge_color},
+                    'steps': [
+                        {'range': [0, 5], 'color': '#ef5350'},
+                        {'range': [5, 8], 'color': '#ffa726'},
+                        {'range': [8, 10], 'color': '#26a69a'}
+                    ],
+                }
+            ))
+            fig.update_layout(height=250, margin=dict(l=30, r=30, t=40, b=20))
+            st.plotly_chart(fig, use_container_width=True)
+
+            # --- Pretty Info Boxes ---
+            st.success(f"Summary: {summary}" if summary else "Summary not found.")
+            st.info(f"Suggestions: {suggestions}" if suggestions else "No suggestions found.")
 
 # Call the app
 if __name__ == "__main__":

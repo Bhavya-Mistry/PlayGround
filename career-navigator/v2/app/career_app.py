@@ -147,7 +147,6 @@ def run():
                 for k, v in multi_label_inputs.items():
                     st.markdown(f"- <span style='color:#1976d2'><b>{k.replace('_', ' ')}:</b></span> {', '.join(v) if v else 'None'}", unsafe_allow_html=True)
                 st.markdown(f"- <b>Preferred Work Style:</b> {preferred_style}", unsafe_allow_html=True)
-                st.markdown(f"- <b>Problem Solving Style:</b> {problem_style}", unsafe_allow_html=True)
                 st.markdown(f"- <b>Wants to go for Masters:</b> {masters}", unsafe_allow_html=True)
                 st.markdown(f"- <b>Interested in Research:</b> {research}", unsafe_allow_html=True)
                 st.markdown(f"- <b>CGPA:</b> {cgpa}", unsafe_allow_html=True)
