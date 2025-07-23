@@ -2,10 +2,11 @@ import streamlit as st
 import joblib
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
 from streamlit.components.v1 import html
 import os
-import joblib
+import requests
+
+API_BASE = os.getenv("API_BASE", "http://localhost:8000")
 
 # st.set_page_config(page_title="AI-Powered Career Navigator", layout="wide")
 
@@ -16,9 +17,10 @@ def run():
     BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     MODEL_DIR = os.path.join(BASE_DIR, "saved-models")
 
-    model = joblib.load(os.path.join(MODEL_DIR, "career_model.pkl"))
+    # Load multi-label binarizers for building UI options
     mlb_dict = joblib.load(os.path.join(MODEL_DIR, "mlb_dict.pkl"))
-    label_encoder = joblib.load(os.path.join(MODEL_DIR, "label_encoder.pkl"))
+    # Load the trained model only to access feature_names_in_
+    model = joblib.load(os.path.join(MODEL_DIR, "career_model.pkl"))
 
     from .resume_parser import parse_resume
     from .prompts import build_ats_prompt
@@ -83,18 +85,12 @@ def run():
         unsafe_allow_html=True
     )
 
-    st.markdown("""
-        <div class='main-title'>🚀 Career Navigator & ATS</div>
-        <p style='text-align:center; color:#374151; font-size:1.15em;'>
-            Get personalized career recommendations and evaluate your resume for any job role.<br>
-            <span style='color:#1976d2;'>AI-powered, modern, and user-friendly.</span>
-        </p>
-    """, unsafe_allow_html=True)
 
     with st.container():
         st.markdown("<div class='section-header'>📝 Profile Information</div>", unsafe_allow_html=True)
-        col1, col2 = st.columns([1, 1])
-        with col1:
+        # Center-narrow layout: empty spacers left & right
+        left_spacer, main_col, right_spacer = st.columns([1,3,1])
+        with main_col:
             multi_label_inputs = {}
             for col in mlb_dict.keys():
                 options = mlb_dict[col].classes_
@@ -104,7 +100,6 @@ def run():
             problem_style = st.selectbox("Problem Solving Style", ["Analytical", "Creative", "Logical", "Experimental"], help="How do you approach problems?")
             masters = st.radio("Do you want to go for Masters?", ["Yes", "No"], horizontal=True)
             research = st.radio("Interested in Research?", ["Yes", "No"], horizontal=True)
-        with col2:
             cgpa = st.slider("Current CGPA", 2.0, 10.0, 7.5, 0.1, help="Your latest CGPA")
             projects = st.number_input("Current Projects Count", min_value=0, step=1, help="How many projects have you done?")
             internships = st.number_input("Internship Duration (in months)", min_value=0, step=1, help="Total months of internship experience")
@@ -134,14 +129,17 @@ def run():
                     final_input[col] = 0
             return final_input[model.feature_names_in_]
 
-        pred_col, prob_col = st.columns([1, 1])
-        with pred_col:
-            if st.button("🔍 Predict My Career", use_container_width=True):
-                input_df = prepare_input()
-                pred = model.predict(input_df)[0]
-                proba = model.predict_proba(input_df)[0]
-                career = label_encoder.inverse_transform([pred])[0]
-                st.success(f"🎯 We recommend: **{career}**", icon="🎯")
+        if st.button("🔍 Predict My Career", use_container_width=True):
+            input_df = prepare_input()
+            features_dict = input_df.iloc[0].to_dict()
+            with st.spinner("Getting recommendation..."):
+                try:
+                    resp = requests.post(f"{API_BASE}/predict-career/", json=features_dict, timeout=30)
+                    resp.raise_for_status()
+                    career = resp.json().get("recommended_career", "Unknown")
+                    st.success(f"🎯 We recommend: **{career}**", icon="🎯")
+                except Exception as err:
+                    st.error(f"Failed to get recommendation: {err}")
                 st.markdown("<div style='margin-top:0.5em;'></div>", unsafe_allow_html=True)
                 st.markdown("<b>Your Selections:</b>", unsafe_allow_html=True)
                 for k, v in multi_label_inputs.items():
@@ -152,27 +150,7 @@ def run():
                 st.markdown(f"- <b>CGPA:</b> {cgpa}", unsafe_allow_html=True)
                 st.markdown(f"- <b>Projects Count:</b> {projects}", unsafe_allow_html=True)
                 st.markdown(f"- <b>Internship Duration (months):</b> {internships}", unsafe_allow_html=True)
-        with prob_col:
-            if st.button("📈 Show Career Probabilities", use_container_width=True):
-                input_df = prepare_input()
-                proba = model.predict_proba(input_df)[0]
-                top_3_idx = np.argsort(proba)[::-1][:3]
-                top_3_careers = label_encoder.inverse_transform(top_3_idx)
-                top_3_scores = proba[top_3_idx]
-                fig = go.Figure(go.Bar(
-                    x=top_3_scores[::-1],
-                    y=top_3_careers[::-1],
-                    orientation='h',
-                    marker=dict(color=['#1976d2', '#00c6ff', '#3949ab'])
-                ))
-                fig.update_layout(
-                    xaxis_title="Probability",
-                    yaxis_title="Career",
-                    template="simple_white",
-                    margin=dict(l=0, r=0, t=30, b=0),
-                    height=250
-                )
-                st.plotly_chart(fig, use_container_width=True)
+        
 
     st.markdown("<div class='section-header'>🎓 Recommended Resources</div>", unsafe_allow_html=True)
     with st.container():

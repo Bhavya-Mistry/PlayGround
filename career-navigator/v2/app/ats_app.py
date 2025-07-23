@@ -1,7 +1,8 @@
 import streamlit as st
-from .resume_parser import parse_resume
-from .gemini_handler import get_gemini_response
-from .prompts import build_ats_prompt
+import requests
+import os
+
+API_BASE = os.getenv("API_BASE", "http://localhost:8000")
 
 def run():
     # st.set_page_config(page_title="Smart ATS Resume Evaluator", layout="centered")
@@ -11,20 +12,38 @@ def run():
     job_role = st.text_input("Target Job Role", value="Software Engineer")
 
     if uploaded_file and st.button("Evaluate"):
-        with st.spinner("Reading your resume..."):
-            resume_text = parse_resume(uploaded_file)
+        file_bytes = uploaded_file.getvalue()
+        files = {"file": (uploaded_file.name, file_bytes, uploaded_file.type)}
 
-        if resume_text.startswith("Unsupported"):
-            st.error(resume_text)
-        else:
-            # --- Beautiful Resume Preview ---
-            with st.expander("📃 Show Extracted Resume Text", expanded=False):
-                st.text_area("Resume Preview", resume_text, height=200)
+        # --- Get resume text for preview ---
+        resume_text = ""
+        with st.spinner("Extracting resume text..."):
+            try:
+                resp = requests.post(f"{API_BASE}/parse-resume/", files=files, timeout=30)
+                resp.raise_for_status()
+                resume_text = resp.json().get("resume_text", "")
+            except Exception as err:
+                st.error(f"Failed to parse resume: {err}")
 
-            with st.spinner("Sending to Gemini for evaluation..."):
-                prompt = build_ats_prompt(resume_text, job_role)
-                result = get_gemini_response(prompt)
+        if not resume_text:
+            st.error("Could not extract text from resume.")
+            return
 
+        # --- Display preview ---
+        with st.expander("📃 Show Extracted Resume Text", expanded=False):
+            st.text_area("Resume Preview", resume_text, height=200)
+
+        # --- Get ATS evaluation ---
+        with st.spinner("Evaluating ATS score..."):
+            try:
+                resp2 = requests.post(
+                    f"{API_BASE}/ats-score/", files=files, data={"job_role": job_role}, timeout=60
+                )
+                resp2.raise_for_status()
+                result = resp2.json().get("ats_result", "")
+            except Exception as err:
+                st.error(f"Failed to get ATS result: {err}")
+                return
             # --- Parse Gemini Result for Pretty Output ---
             summary, score, suggestions = "", "", ""
             import re
