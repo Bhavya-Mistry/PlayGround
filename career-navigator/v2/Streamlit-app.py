@@ -9,7 +9,7 @@ import plotly.graph_objects as go
 
 API_BASE = os.getenv("API_BASE", "http://localhost:8000")
 
-st.set_page_config(page_title="Career Navigator", layout="wide", page_icon="🚀")
+st.set_page_config(page_title="Future Trail | Career Navigator", layout="wide", page_icon="🚀")
 
 # --- Modern CSS Styling ---
 st.markdown(
@@ -51,10 +51,10 @@ st.markdown(
 )
 
 # --- Main Title ---
-st.markdown('<div class="main-title">🚀 AI-Powered Career Navigator</div>', unsafe_allow_html=True)
+st.markdown('<div class="main-title">🚀 Future Trail | Career Navigator</div>', unsafe_allow_html=True)
 
 # --- Sidebar Navigation ---
-page = st.sidebar.radio("Go to", ["🎓 Career Predictor", "📄 ATS Resume Evaluator"])
+page = st.sidebar.radio("Functionalities", ["🎓 Career Predictor", "📄 ATS Resume Evaluator"])
 
 # --- Career Predictor ---
 def run_career_predictor():
