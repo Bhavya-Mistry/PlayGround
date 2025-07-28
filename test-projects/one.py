@@ -297,7 +297,7 @@ def generate_row(recommended_career):
     }
 
 # --- Main script ---
-NUM_ROWS = random.randint(5000, 7000)
+NUM_ROWS = random.randint(17000, 19000)
 OUTPUT_FILENAME = "generated_career_data.csv"
 
 # Define header based on keys from generate_row and sample
