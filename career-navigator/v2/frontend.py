@@ -50,6 +50,215 @@ st.markdown(
     unsafe_allow_html=True
 )
 
+resource_map = {
+        "Software Developer (Backend)": [
+            "System Design Primer (GitHub)",
+            "LeetCode Practice",
+            "Build REST APIs with Flask/Django (Udemy)"
+        ],
+        "Software Developer (Frontend)": [
+            "Frontend Masters",
+            "JavaScript: The Good Parts (Book)",
+            "CSS-Tricks Tutorials"
+        ],
+        "Full Stack Developer": [
+            "The Odin Project",
+            "Full-Stack Web Dev with React Specialization (Coursera)",
+            "Build Responsive Real‑World Websites with HTML & CSS (Udemy)"
+        ],
+        "Mobile Developer (Android)": [
+            "Android Basics Nanodegree (Udacity)",
+            "Android Developer Documentation (developer.android.com)",
+            "Kotlin for Android Developers (Book)"
+        ],
+        "Mobile Developer (iOS)": [
+            "iOS App Development with Swift Specialization (Coursera)",
+            "Ray Wenderlich iOS Tutorials",
+            "Hacking with Swift (Paul Hudson)"
+        ],
+        "Game Developer": [
+            "Unity Learn",
+            "Unreal Engine Online Learning",
+            "Game Programming Patterns (Book)"
+        ],
+        "AR/VR Developer": [
+            "Unity XR: VR Development (Udemy)",
+            "Coursera AR & VR Specialization",
+            "Google ARCore Developer Documentation"
+        ],
+        "Blockchain Developer": [
+            "Ethereum and Solidity: The Complete Developer’s Guide (Udemy)",
+            "Blockchain Developer Nanodegree (Udacity)",
+            "Mastering Bitcoin (Book)"
+        ],
+        "Data Scientist": [
+            "Machine Learning by Andrew Ng (Coursera)",
+            "Kaggle Competitions",
+            "fast.ai Practical Deep Learning"
+        ],
+        "Machine Learning Engineer": [
+            "Deep Learning Specialization (Coursera)",
+            "ML Engineer Nanodegree (Udacity)",
+            "Hands‑On Machine Learning with Scikit‑Learn, Keras & TensorFlow (Book)"
+        ],
+        "AI Prompt Engineer": [
+            "Prompt Engineering for Everyone (DeepLearning.AI)",
+            "The Art of Prompting (Blog series)",
+            "OpenAI Cookbook Examples"
+        ],
+        "Big Data Engineer": [
+            "Big Data Specialization (Coursera)",
+            "Hadoop: The Definitive Guide (Book)",
+            "Data Engineering on Google Cloud Platform (Coursera)"
+        ],
+        "MLOps Engineer": [
+            "MLOps Fundamentals (Coursera)",
+            "Kubeflow Documentation",
+            "Building Machine Learning Pipelines (O’Reilly)"
+        ],
+        "AI Ethicist": [
+            "Ethics of AI and Big Data (edX)",
+            "AI Ethics by Oxford (Online)",
+            "Weapons of Math Destruction (Book)"
+        ],
+        "Data Engineer": [
+            "Data Engineering Nanodegree (Udacity)",
+            "Designing Data‑Intensive Applications (Book)",
+            "ETL Pipelines with Airflow (Udemy)"
+        ],
+        "DevOps Engineer": [
+            "Docker Mastery (Udemy)",
+            "Learn Kubernetes (Coursera)",
+            "CI/CD with Jenkins (Pluralsight)"
+        ],
+        "Cloud Engineer": [
+            "AWS Certified Solutions Architect – Associate (A Cloud Guru)",
+            "Google Cloud Professional Cloud Architect (Coursera)",
+            "Microsoft Certified: Azure Administrator (Udemy)"
+        ],
+        "Solutions Architect": [
+            "AWS Certified Solutions Architect – Professional",
+            "Architecting with Google Cloud (Coursera)",
+            "Azure Solutions Architect Expert (Microsoft Learn)"
+        ],
+        "Platform Engineer": [
+            "Platform Engineering with Terraform (Udemy)",
+            "Kubernetes Operators (Book)",
+            "GitOps with Flux (Weaveworks)"
+        ],
+        "Systems Engineer": [
+            "Computer Systems: A Programmer’s Perspective (Book)",
+            "Linux System Administration (Udemy)",
+            "Red Hat Certified Engineer (RHCE)"
+        ],
+        "Cybersecurity Analyst": [
+            "TryHackMe",
+            "Hack The Box",
+            "Cybrary Security Analyst Path"
+        ],
+        "Security Engineer": [
+            "Practical Network Penetration Tester (Udemy)",
+            "Offensive Security Certified Professional (OSCP)",
+            "Security Engineering (Book)"
+        ],
+        "Quality Assurance Engineer": [
+            "ISTQB Foundation (Udemy)",
+            "Selenium WebDriver with Java (Udemy)",
+            "Software Testing: Principles and Practices (Book)"
+        ],
+        "Software Test Automation Engineer": [
+            "Test Automation University",
+            "Appium: Mobile Test Automation (Udemy)",
+            "Robot Framework Guide (Online)"
+        ],
+        "Research Intern (AI/ML)": [
+            "ArXiv.org Papers",
+            "Google AI Residency Insights",
+            "FastAI Kaggle Research"
+        ],
+        "Research Intern (General)": [
+            "University Lab Websites",
+            "ResearchGate Networking",
+            "How to Write a Research Paper (Course)"
+        ],
+        "MS in Computer Science": [
+            "Official University Program Pages",
+            "GRE Prep Course (Magoosh)",
+            "Statement of Purpose Guide (Online)"
+        ],
+        "MS in Data Science": [
+            "Data Science MS Program Reviews (CSRankings)",
+            "GRE/TOEFL Prep",
+            "MSDS Statement of Purpose Samples"
+        ],
+        "Ph.D. Candidate": [
+            "PhD Application Workshop (Coursera)",
+            "Academic Writing for Graduate Students (Book)",
+            "How to Choose a PhD Advisor (Blog)"
+        ],
+        "UI/UX Designer": [
+            "Google UX Design Certificate (Coursera)",
+            "Figma for Beginners (Udemy)",
+            "Design Thinking by IDEO (Online)"
+        ],
+        "Product Manager": [
+            "Product Management 101 (Udemy)",
+            "Inspired (Book by Marty Cagan)",
+            "One Month Product Management"
+        ],
+        "Project Manager": [
+            "PMP Certification Prep (Udemy)",
+            "Scrum Master Certification (Scrum.org)",
+            "Project Management for Non‑Project Managers (LinkedIn Learning)"
+        ],
+        "Technical Writer": [
+            "Technical Writing: How to Write Software Docs (Udemy)",
+            "Google Developer Documentation Style Guide",
+            "Docs Like Code (Book)"
+        ],
+        "Technical Consultant": [
+            "Consulting Case Interview Prep (Coursera)",
+            "The McKinsey Way (Book)",
+            "Frameworks for Problem Solving (Online)"
+        ],
+        "Technical Program Manager (TPM)": [
+            "TPM Interview Prep (YouTube)",
+            "Cracking the PM Interview (Book)",
+            "Program Management Professional (PgMP)"
+        ],
+        "Business Analyst": [
+            "Business Analysis Fundamentals (Udemy)",
+            "BABOK Guide (IIBA)",
+            "Data Analytics with Excel (Coursera)"
+        ],
+        "Database Administrator": [
+            "Oracle Certified Professional (OCP)",
+            "Microsoft SQL Server Certification",
+            "High Performance MySQL (Book)"
+        ],
+        "Network Engineer": [
+            "CCNA Certification (Cisco)",
+            "Juniper Networks Certification",
+            "Network Warrior (Book)"
+        ],
+        "Embedded Systems Engineer": [
+            "Embedded Systems Essentials with Arm (Coursera)",
+            "Making Embedded Systems (Book)",
+            "Microcontroller Projects (Udemy)"
+        ],
+        "IoT Engineer": [
+            "Introduction to IoT (edX)",
+            "Raspberry Pi Projects (Book)",
+            "IoT Specialization (Coursera)"
+        ],
+        "Bioinformatics Engineer": [
+            "Bioinformatics Specialization (Coursera)",
+            "Bioconductor Workshops",
+            "Algorithms on Strings, Trees, and Sequences (Book)"
+        ]
+    }
+
+
 # --- Main Title ---
 st.markdown('<div class="main-title">🚀 Future Trail | Career Navigator</div>', unsafe_allow_html=True)
 
@@ -58,8 +267,9 @@ page = st.sidebar.radio("Functionalities", ["🎓 Career Predictor", "📄 ATS R
 
 # --- Career Predictor ---
 def run_career_predictor():
+    career = None
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-    MODEL_DIR = os.path.join(BASE_DIR, "saved-models")
+    MODEL_DIR = os.path.join(BASE_DIR, "trained-models")
     mlb_dict = joblib.load(os.path.join(MODEL_DIR, "mlbdict.pkl"))
     ohe = joblib.load(os.path.join(MODEL_DIR, "ohencoder.pkl"))
     
@@ -130,17 +340,18 @@ def run_career_predictor():
 
     st.markdown("<div class='section-header'>🎓 Recommended Resources</div>", unsafe_allow_html=True)
     st.markdown("Get started with these resources for your top careers:")
-    resource_map = {
-        "Data Scientist": ["Coursera ML by Andrew Ng", "Kaggle Competitions", "fast.ai"],
-        "Cybersecurity Analyst": ["TryHackMe", "HackTheBox", "Cybrary"],
-        "DevOps Engineer": ["Docker Mastery", "Learn Kubernetes", "CI/CD with Jenkins"],
-        "Software Developer (Backend)": ["System Design Primer", "LeetCode", "Build REST APIs"],
-        "UI/UX Designer": ["Google UX Certification", "Figma Basics", "Design Thinking by IDEO"]
-    }
-    for role, resources in resource_map.items():
-        with st.expander(f"{role} Resources", expanded=False):
-            for item in resources:
+    
+    if career:
+        recommended_resources = resource_map.get(career, [])
+        if not recommended_resources:
+            st.warning("😕 Oops! We don’t have curated resources for that exact role yet.")
+        else:
+            for item in recommended_resources:
                 st.markdown(f"- {item}")
+    # for role, resources in resource_map.items():
+    #     with st.expander(f"{role} Resources", expanded=False):
+    #         for item in resources:
+    #             st.markdown(f"- {item}")
 
 # --- ATS Resume Evaluator ---
 def run_ats_evaluator():

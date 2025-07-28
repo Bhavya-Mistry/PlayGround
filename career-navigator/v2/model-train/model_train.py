@@ -66,10 +66,10 @@ final_rf = RandomForestClassifier(
 final_rf.fit(X, y_enc)
 
 # Save model, encoders, and transformers
-joblib.dump(final_rf, r"saved-models\careermodel.pkl")
-joblib.dump(le, r"saved-models\labelencoder.pkl")
-joblib.dump(mlb_dict, r"saved-models\mlbdict.pkl")
-joblib.dump(ohe, r"saved-models\ohencoder.pkl")
+joblib.dump(final_rf, r"trained-models\careermodel.pkl")
+joblib.dump(le, r"trained-models\labelencoder.pkl")
+joblib.dump(mlb_dict, r"trained-models\mlbdict.pkl")
+joblib.dump(ohe, r"trained-models\ohencoder.pkl")
 
 # To confirm the process, we can also plot feature importances (optional)
 import matplotlib.pyplot as plt

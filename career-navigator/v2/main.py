@@ -28,9 +28,9 @@ label_encoder = None
 @app.on_event("startup")
 def load_models():
     global career_model, mlb_dict, label_encoder
-    career_model = joblib.load(r"saved-models/careermodel.pkl")
-    mlb_dict = joblib.load(r"saved-models/mlbdict.pkl")
-    label_encoder = joblib.load(r"saved-models/labelencoder.pkl")
+    career_model = joblib.load(r"trained-models/careermodel.pkl")
+    mlb_dict = joblib.load(r"trained-models/mlbdict.pkl")
+    label_encoder = joblib.load(r"trained-models/labelencoder.pkl")
 
 @app.get("/")
 def root():
