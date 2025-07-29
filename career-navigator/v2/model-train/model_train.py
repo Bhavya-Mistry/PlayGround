@@ -58,15 +58,16 @@ y_enc = le.fit_transform(y)
 # Train RandomForestClassifier
 final_rf = RandomForestClassifier(
     n_estimators=200,
-    max_depth=None,
-    min_samples_leaf=1,
+    max_depth=20,            # cap tree depth
+    min_samples_leaf=2,      # force at least 2 samples per leaf
+    ccp_alpha=1e-3,          # cost‑complexity pruning
     random_state=42
 )
 
 final_rf.fit(X, y_enc)
 
 # Save model, encoders, and transformers
-joblib.dump(final_rf, r"trained-models\careermodel.pkl",compress=5)
+joblib.dump(final_rf, r"trained-models\careermodel.pkl")
 joblib.dump(le, r"trained-models\labelencoder.pkl")
 joblib.dump(mlb_dict, r"trained-models\mlbdict.pkl")
 joblib.dump(ohe, r"trained-models\ohencoder.pkl")
