@@ -21,7 +21,7 @@ Thumbs.db
 # IDE files (VS Code)
 .vscode/
 
-.pkl
+
 #keys
 
 .env
