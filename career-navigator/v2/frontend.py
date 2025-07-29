@@ -355,7 +355,7 @@ def run_career_predictor():
 
 # --- ATS Resume Evaluator ---
 def run_ats_evaluator():
-    st.title("📄 Smart ATS Resume Evaluator (Offline + Free)")
+    st.title("📄 Smart ATS Resume Evaluator ")
     uploaded_file = st.file_uploader("Upload your Resume (PDF or DOCX)", type=["pdf", "docx"])
     job_role = st.text_input("Target Job Role", value="Software Engineer")
 
