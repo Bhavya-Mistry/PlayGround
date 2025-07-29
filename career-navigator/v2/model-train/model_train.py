@@ -66,7 +66,7 @@ final_rf = RandomForestClassifier(
 final_rf.fit(X, y_enc)
 
 # Save model, encoders, and transformers
-joblib.dump(final_rf, r"trained-models\careermodel.pkl")
+joblib.dump(final_rf, r"trained-models\careermodel.pkl",compress=5)
 joblib.dump(le, r"trained-models\labelencoder.pkl")
 joblib.dump(mlb_dict, r"trained-models\mlbdict.pkl")
 joblib.dump(ohe, r"trained-models\ohencoder.pkl")
