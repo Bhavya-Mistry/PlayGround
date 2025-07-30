@@ -6,17 +6,68 @@ import requests
 import os
 import plotly.graph_objects as go
 import re
-
-
-import streamlit as st
-import yaml
-from yaml.loader import SafeLoader
+import psycopg2 # You need to install this: pip install psycopg2-binary
 import streamlit_authenticator as stauth
 
-# --- USER AUTHENTICATION ---
-# Load config file
-with open("credentials.yaml") as file:
-    config = yaml.load(file, Loader=SafeLoader)
+# --- DATABASE FUNCTIONS (Replaces YAML) ---
+def get_db_connection():
+    """Establishes a connection to the PostgreSQL database using secrets."""
+    conn = psycopg2.connect(st.secrets["DB_CONNECTION_STRING"])
+    return conn
+
+# Updated fetch_users function to include email
+def fetch_users():
+    """Fetches user data from the database for the authenticator."""
+    try:
+        with get_db_connection() as conn: # Use 'with' for the connection
+            with conn.cursor() as cur:     # And for the cursor
+                cur.execute("SELECT name, username, password, email FROM users")
+                users = cur.fetchall()
+
+        credentials = {"usernames": {}}
+        for name, username, password, email in users:
+            credentials["usernames"][username] = {
+                "name": name, 
+                "password": password,
+                "email": email
+            }
+        return credentials
+    except (Exception, psycopg2.DatabaseError) as error:
+        st.error(f"Error fetching users from database: {error}")
+        return {"usernames": {}}
+
+# Updated save_new_user function to include email
+def save_new_user(username, name, hashed_password, email):
+    """Saves a new registered user to the database."""
+    try:
+        with get_db_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    "INSERT INTO users (name, username, password, email) VALUES (%s, %s, %s, %s)",
+                    (name, username, hashed_password, email)
+                )
+                conn.commit()
+        return True
+    except (Exception, psycopg2.DatabaseError) as error:
+        # Rollback the transaction on error
+        if 'conn' in locals() and conn is not None:
+            conn.rollback()
+        st.error(f"Error saving new user: {error}")
+        return False
+
+# --- USER AUTHENTICATION (Using Database) ---
+# Fetch credentials from the database instead of a file
+user_credentials = fetch_users()
+
+# Create the config dictionary programmatically
+config = {
+    'credentials': user_credentials,
+    'cookie': {
+        'name': st.secrets.get("COOKIE_NAME", "some_cookie_name"),
+        'key': st.secrets.get("COOKIE_KEY", "some_secret_key"),
+        'expiry_days': 30
+    }
+}
 
 # Create authenticator object
 authenticator = stauth.Authenticate(
@@ -26,18 +77,21 @@ authenticator = stauth.Authenticate(
     config['cookie']['expiry_days']
 )
 
+# Initialize session state for registration
+if "registration_success" not in st.session_state:
+    st.session_state.registration_success = False
 
 # --- MAIN APP ---
-# Check authentication status
+st.set_page_config(page_title="Future Trail | Career Navigator", layout="wide", page_icon="🚀")
+
 if st.session_state.get("authentication_status"):
     # --- LOGGED-IN VIEW ---
-    st.title("Welcome, authenticated user!")
-
+    st.title(f'Welcome Back {st.session_state["name"]}!')
+    authenticator.logout('Logout', 'sidebar')
+    
     API_BASE = os.getenv("API_BASE", "http://localhost:8000")
 
-    st.set_page_config(page_title="Future Trail | Career Navigator", layout="wide", page_icon="🚀")
-
-    # --- Modern CSS Styling ---
+    # --- YOUR EXISTING UI AND ML LOGIC (UNCHANGED) ---
     st.markdown(
         """
         <style>
@@ -75,7 +129,6 @@ if st.session_state.get("authentication_status"):
         """,
         unsafe_allow_html=True
     )
-
     resource_map = {
             "Software Developer (Backend)": [
                 "System Design Primer (GitHub)",
@@ -113,7 +166,7 @@ if st.session_state.get("authentication_status"):
                 "Google ARCore Developer Documentation"
             ],
             "Blockchain Developer": [
-                "Ethereum and Solidity: The Complete Developer’s Guide (Udemy)",
+                "Ethereum and Solidity: The Complete Developer's Guide (Udemy)",
                 "Blockchain Developer Nanodegree (Udacity)",
                 "Mastering Bitcoin (Book)"
             ],
@@ -140,7 +193,7 @@ if st.session_state.get("authentication_status"):
             "MLOps Engineer": [
                 "MLOps Fundamentals (Coursera)",
                 "Kubeflow Documentation",
-                "Building Machine Learning Pipelines (O’Reilly)"
+                "Building Machine Learning Pipelines (O'Reilly)"
             ],
             "AI Ethicist": [
                 "Ethics of AI and Big Data (edX)",
@@ -173,7 +226,7 @@ if st.session_state.get("authentication_status"):
                 "GitOps with Flux (Weaveworks)"
             ],
             "Systems Engineer": [
-                "Computer Systems: A Programmer’s Perspective (Book)",
+                "Computer Systems: A Programmer's Perspective (Book)",
                 "Linux System Administration (Udemy)",
                 "Red Hat Certified Engineer (RHCE)"
             ],
@@ -282,16 +335,11 @@ if st.session_state.get("authentication_status"):
                 "Bioconductor Workshops",
                 "Algorithms on Strings, Trees, and Sequences (Book)"
             ]
-        }
-
-
-    # --- Main Title ---
+        } 
+    
     st.markdown('<div class="main-title">🚀 Future Trail | Career Navigator</div>', unsafe_allow_html=True)
-
-    # --- Sidebar Navigation ---
     page = st.sidebar.radio("Functionalities", ["🎓 Career Predictor", "📄 ATS Resume Evaluator"])
 
-    # --- Career Predictor ---
     def run_career_predictor():
         career = None
         BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -370,20 +418,15 @@ if st.session_state.get("authentication_status"):
         if career:
             recommended_resources = resource_map.get(career, [])
             if not recommended_resources:
-                st.warning("😕 Oops! We don’t have curated resources for that exact role yet.")
+                st.warning("😕 Oops! We don't have curated resources for that exact role yet.")
             else:
                 for item in recommended_resources:
                     st.markdown(f"- {item}")
-        # for role, resources in resource_map.items():
-        #     with st.expander(f"{role} Resources", expanded=False):
-        #         for item in resources:
-        #             st.markdown(f"- {item}")
 
-    # --- ATS Resume Evaluator ---
     def run_ats_evaluator():
         st.title("📄 Smart ATS Resume Evaluator ")
         uploaded_file = st.file_uploader("Upload your Resume (PDF or DOCX)", type=["pdf", "docx"])
-        job_role = st.text_input("Target Job Role", value="Software Engineer")
+        job_role = st.text_input("Target Job Role", value="Data Science", help="Enter the job role you are targeting for ATS evaluation.")
 
         if uploaded_file and st.button("Evaluate"):
             file_bytes = uploaded_file.getvalue()
@@ -527,26 +570,19 @@ if st.session_state.get("authentication_status"):
                 st.success("✅ Great job! No critical suggestions found. Your resume seems well-aligned.")
             # --- END OF IMPROVED SUGGESTIONS LOGIC ---
 
-    # --- Main Routing ---
     if page == "🎓 Career Predictor":
-        st.markdown('<div class="section-header"></div>', unsafe_allow_html=True)
         run_career_predictor()
     elif page == "📄 ATS Resume Evaluator":
-        st.markdown('<div class="section-header"></div>', unsafe_allow_html=True)
         run_ats_evaluator()
-
-
-    authenticator.logout('Logout', 'main', key='unique_key_logout')
-    st.write(f'Welcome *{st.session_state["name"]}*')
-    st.title('Your App')
-    st.write("This is a protected page.")
 
 else:
     # --- LOGIN/REGISTER VIEW ---
+    st.title("Welcome to Future Trail 🚀")
+    st.markdown("Please log in or register to continue.")
+    
     try:
         login_tab, register_tab = st.tabs(["🔐 Login", "📝 Register"])
 
-        # --- LOGIN FORM ---
         with login_tab:
             authenticator.login(location='main')
             if st.session_state["authentication_status"] is False:
@@ -554,15 +590,65 @@ else:
             elif st.session_state["authentication_status"] is None:
                 st.warning('Please enter your username and password')
 
-        # --- REGISTRATION FORM ---
         with register_tab:
-            if authenticator.register_user(location='main',
-                                           fields={'Form name': 'New User Registration'}):
-                st.success('User registered successfully! Please go to the Login tab to sign in.')
-                # Save the updated credentials back to the file
-                with open('credentials.yaml', 'w') as file:
-                    yaml.dump(config, file, default_flow_style=False)
+            # Show success message if registration was successful
+            if st.session_state.registration_success:
+                st.success('Registration successful! Please go to the "Login" tab to sign in.')
+                st.balloons()
+                st.session_state.registration_success = False
+                st.stop()
+            
+            # Custom registration form with email field
+            st.subheader("📝 Register New User")
+            
+            with st.form("register_form"):
+                col1, col2 = st.columns(2)
+                
+                with col1:
+                    name = st.text_input("Full Name*", placeholder="Enter your full name")
+                    username = st.text_input("Username*", placeholder="Choose a username")
+                    email = st.text_input("Email*", placeholder="Enter your email address")
+                
+                with col2:
+                    password = st.text_input("Password*", type="password", placeholder="Enter password")
+                    confirm_password = st.text_input("Confirm Password*", type="password", placeholder="Re-enter password")
+                
+                submitted = st.form_submit_button("Register User", use_container_width=True)
+                
+                if submitted:
+                    # Enhanced validation including email
+                    if not all([name, username, email, password, confirm_password]):
+                        st.error("❌ Please fill in all required fields")
+                    elif len(password) < 6:
+                        st.error("❌ Password must be at least 6 characters long")
+                    elif password != confirm_password:
+                        st.error("❌ Passwords do not match")
+                    elif '@' not in email or '.' not in email.split('@')[-1]:
+                        st.error("❌ Please enter a valid email address")
+                    elif username in config['credentials']['usernames']:
+                        st.error("❌ Username already exists. Please choose a different username.")
+                    else:
+                        try:
+                            # Hash the password
+                            hasher = stauth.Hasher()
+                            hashed_password = hasher.hash(password)
+
+                            # Save to database with email
+                            if save_new_user(username, name, hashed_password, email):
+                                # Update the in-memory credentials
+                                config['credentials']['usernames'][username] = {
+                                    'name': name,
+                                    'password': hashed_password,
+                                    'email': email
+                                }
+
+                                st.session_state.registration_success = True
+                                st.rerun()
+                            else:
+                                st.error("❌ Registration failed. Please try again.")
+
+                        except Exception as e:
+                            st.error(f"❌ Registration error: {str(e)}")
 
     except Exception as e:
-        st.error(e)
-
+        st.error(f"An unexpected error occurred: {e}")
