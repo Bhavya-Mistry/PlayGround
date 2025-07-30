@@ -89,7 +89,7 @@ if st.session_state.get("authentication_status"):
     st.title(f'Welcome Back {st.session_state["name"]}!')
     authenticator.logout('Logout', 'sidebar')
     
-    API_BASE = os.getenv("API_BASE", "http://localhost:8000")
+    API_BASE = os.getenv("API_BASE", "https://playground-pknf.onrender.com")
 
     # --- YOUR EXISTING UI AND ML LOGIC (UNCHANGED) ---
     st.markdown(
