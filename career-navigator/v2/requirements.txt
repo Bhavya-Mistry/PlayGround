@@ -13,3 +13,6 @@ fastapi
 uvicorn
 requests
 python-multipart
+streamlit-authenticator
+PyYAML
+bcrypt
