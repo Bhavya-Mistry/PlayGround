@@ -594,9 +594,11 @@ else:
             # Show success message if registration was successful
             if st.session_state.registration_success:
                 st.success('Registration successful! Please go to the "Login" tab to sign in.')
-                st.balloons()
+                
                 st.session_state.registration_success = False
                 st.stop()
+
+                st.balloons()
             
             # Custom registration form with email field
             st.subheader("📝 Register New User")
