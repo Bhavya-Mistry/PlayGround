@@ -597,7 +597,7 @@ else:
                 st.success('Registration successful! Please go to the "Login" tab to sign in.')
                 
                 st.session_state.registration_success = False
-                st.stop()
+                # st.stop()
 
                 
             
