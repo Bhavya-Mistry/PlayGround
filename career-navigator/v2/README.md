@@ -117,7 +117,7 @@ This tool provides an automated analysis of a user's resume against a specific j
         -   **Other features**: `CGPA`, `Current_Projects_Count`, `Internship_Experience`, `Wants_to_Go_for_Masters`, `Interested_in_Research`.
     -   **Saved Artifacts:** `careermodel.pkl`, `labelencoder.pkl`, `mlbdict.pkl`, `ohencoder.pkl`.
 -   **Resume Evaluation (Gemini API):**
-    -   **Model:** `gemini-1.0-pro`.
+    -   **Model:** `gemini-2.5-flash`.
     -   **Prompt Engineering:** A specific prompt is constructed in `app/prompts.py` to instruct the Gemini model to act as an ATS, providing a structured response containing a summary, score, and suggestions.
 
 ## 4. Detailed Setup and Run Instructions
