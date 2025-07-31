@@ -1,4 +1,4 @@
-# Documentation: Career Navigator v2
+# Future Trail | Career Navigator
 
 ## 1. Project Overview
 
