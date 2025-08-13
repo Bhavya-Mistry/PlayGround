@@ -420,7 +420,7 @@ if st.session_state.get("authentication_status"):
                     st.success(f"🎯 We recommend: **{career}**", icon="🎯")
                     ############################################################
                     if update_user_career(st.session_state["username"], career):
-                        st.success("Your predicted career has been saved successfully!")
+                        st.info("Your predicted career has been saved successfully!")
                     else:
                         st.warning("Failed to save your predicted career. Please try again later.")
                     ############################################################
