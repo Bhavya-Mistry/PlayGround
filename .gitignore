@@ -26,3 +26,33 @@ Thumbs.db
 
 # Environment variables
 .env
+
+
+# Python backend ignores
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg-info/
+
+# Virtual environments
+venv/
+env/
+
+# Environment variables/secrets
+.env
+
+# Database & logs
+*.sqlite3
+*.db
+*.log
+
+# Coverage & test cache
+htmlcov/
+.coverage*
+.pytest_cache/
+
+# OS files
+.DS_Store
+Thumbs.db
+
