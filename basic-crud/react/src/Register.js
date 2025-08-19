@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 
-const API_URL = "http://localhost:5000";
+// Base URL pointing to backend API prefix
+const API_URL = "http://localhost:5000/api";
 
 function Register({ onRegisterSuccess }) {
   const [email, setEmail] = useState("");
@@ -10,7 +11,7 @@ function Register({ onRegisterSuccess }) {
   const handleRegister = async (e) => {
     e.preventDefault();
     setMessage("");
-    const res = await fetch(`${API_URL}/register`, {
+    const res = await fetch(`${API_URL}/signup`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password })

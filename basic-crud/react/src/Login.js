@@ -1,8 +1,11 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
-const API_URL = "http://localhost:5000";
+// Base URL pointing to backend API prefix
+const API_URL = "http://localhost:5000/api";
 
 function Login({ onLoginSuccess }) {
+  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
@@ -10,7 +13,7 @@ function Login({ onLoginSuccess }) {
   const handleLogin = async (e) => {
     e.preventDefault();
     setMessage("");
-    const res = await fetch(`${API_URL}/login`, {
+    const res = await fetch(`${API_URL}/signin`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password })
@@ -18,6 +21,7 @@ function Login({ onLoginSuccess }) {
     const data = await res.json();
     if (res.ok) {
       onLoginSuccess({ email, api_key: data.api_key });
+      navigate('/dashboard');
     } else {
       setMessage(data.error || "Login failed");
     }
