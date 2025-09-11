@@ -134,7 +134,7 @@ authenticator = stauth.Authenticate(
 initialize_session_state()
 
 # Fixed: Change to local backend URL
-API_BASE = os.getenv("API_BASE", "http://localhost:8000")
+API_BASE = os.getenv("API_BASE", "https://playground-pknf.onrender.com")
 
 # Enhanced CSS
 st.markdown(
