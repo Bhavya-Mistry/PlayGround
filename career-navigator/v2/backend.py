@@ -5,6 +5,10 @@ from pydantic import BaseModel
 import joblib
 import pandas as pd
 import traceback
+import json
+import faiss
+import numpy as np
+from sentence_transformers import SentenceTransformer
 
 # These would be in separate files in a real app
 from app.resume_parser import parse_resume
@@ -14,7 +18,6 @@ from app.gemini_handler import get_gemini_response
 app = FastAPI(title="Career Navigator API")
 
 # --- Middleware ---
-# In production, change "*" to your Streamlit app's URL for security
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -26,36 +29,38 @@ app.add_middleware(
 # --- Globals for ML Models ---
 career_model = None
 label_encoder = None
+sentence_model = None
+roadmap_index = None
+roadmap_data = None
 
 # --- Pydantic Models for Validation ---
-# This model ensures the data from the frontend has the correct structure and types.
 class CareerFeatures(BaseModel):
-    CGPA: float
-    Current_Projects_Count: int
-    Internship_Experience: int
-    Wants_to_Go_for_Masters: int
-    Interested_in_Research: int
-    # The frontend will send a dictionary that matches this structure.
-    # We use a flexible dict here, but in a real app, you might list all possible features.
-    # For this example, we'll assume the frontend sends all necessary columns.
-    # The frontend is now responsible for ensuring all encoded columns are present.
-    # This is a good example of how to define it for a dynamic set of features.
-    # We will pass a dict from the frontend and load it directly.
-    # Let's adjust the endpoint to accept a raw dict for simplicity, but with a clear note.
-    pass # Pydantic model is best practice, but let's stick to the user's dict for now and just fix the logic.
-
+    pass
 
 class ATSRequest(BaseModel):
     resume_text: str
     job_role: str
 
+class RoadmapRequest(BaseModel):
+    resume_text: str
+
 # --- App Events ---
 @app.on_event("startup")
 def load_models():
-    """Load models on startup to avoid loading them on every request."""
-    global career_model, label_encoder
+    """Load all models on startup to avoid loading them on every request."""
+    global career_model, label_encoder, sentence_model, roadmap_index, roadmap_data
+    
+    # Load existing career prediction models
     career_model = joblib.load(r"trained-models/careermodel.pkl")
     label_encoder = joblib.load(r"trained-models/labelencoder.pkl")
+    
+    # Load sentence transformer for roadmap generation
+    sentence_model = SentenceTransformer("all-MiniLM-L6-v2")
+    
+    # Load FAISS index and roadmap data
+    roadmap_index = faiss.read_index("roadmap_index_local.faiss")
+    with open("career_roadmaps_full.json", "r") as f:
+        roadmap_data = json.load(f)
 
 # --- Helper Classes ---
 class _SyncUploadWrapper:
@@ -65,10 +70,25 @@ class _SyncUploadWrapper:
     def read(self):
         return self._data
 
+# --- Roadmap Generation Functions ---
+def get_resume_embedding(text):
+    """Generate embedding for resume text using sentence transformer."""
+    return sentence_model.encode([text], convert_to_numpy=True).astype("float32")
+
+def search_career_match(query_embedding, k=3):
+    """Search for best career matches using FAISS."""
+    D, I = roadmap_index.search(query_embedding, k=k)
+    results = []
+    for i, score in zip(I[0], D[0]):
+        career_info = roadmap_data[i].copy()
+        career_info['similarity_score'] = float(score)
+        results.append(career_info)
+    return results
+
 # --- API Endpoints ---
 @app.get("/")
 def root():
-    return {"message": "Career Navigator FastAPI is running!"}
+    return {"message": "Career Navigator FastAPI with Roadmap Generation is running!"}
 
 @app.post("/parse-resume/")
 async def parse_resume_endpoint(file: UploadFile = File(...)):
@@ -80,16 +100,15 @@ async def parse_resume_endpoint(file: UploadFile = File(...)):
         return {"resume_text": text}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error parsing resume: {str(e)}")
-import traceback # Make sure this is imported at the top of your file
 
 @app.post("/ats-score/")
 async def ats_score_endpoint(request: ATSRequest):
+    """Get ATS score for resume against job role."""
     try:
         prompt = build_ats_prompt(request.resume_text, request.job_role)
         result = get_gemini_response(prompt)
         return {"ats_result": result}
     except Exception as e:
-        # This will print the full, detailed error to your terminal
         print("--- ERROR IN /ats-score/ ---")
         traceback.print_exc()
         print("-----------------------------")
@@ -97,18 +116,13 @@ async def ats_score_endpoint(request: ATSRequest):
 
 @app.post("/predict-career/")
 def predict_career_endpoint(features: dict):
-    """
-    Predicts a career based on a JSON object of user features.
-    NOTE: Using a Pydantic model is strongly recommended here for production.
-    """
+    """Predicts a career based on a JSON object of user features."""
     if not career_model:
         raise HTTPException(status_code=500, detail="Career model is not loaded.")
     try:
-        # The frontend is now responsible for sending a complete dictionary.
         df = pd.DataFrame([features])
-        
-        # Ensure columns are in the same order as when the model was trained.
         model_cols = career_model.feature_names_in_
+        
         # Add any missing columns with a value of 0
         for col in model_cols:
             if col not in df.columns:
@@ -122,6 +136,63 @@ def predict_career_endpoint(features: dict):
         return {"recommended_career": label}
     except Exception as e:
         tb = traceback.format_exc()
-        # In production, log the traceback but don't send it to the client.
         print(f"Error in predict_career: {tb}") 
         raise HTTPException(status_code=500, detail=f"Prediction error: {str(e)}")
+
+@app.post("/generate-roadmap/")
+async def generate_roadmap_endpoint(request: RoadmapRequest):
+    """Generate career roadmap based on resume analysis."""
+    try:
+        if not sentence_model or roadmap_index is None or roadmap_data is None:
+            raise HTTPException(status_code=500, detail="Roadmap models are not loaded.")
+        
+        # Generate embedding from resume text
+        embedding = get_resume_embedding(request.resume_text)
+        
+        # Search for best career matches
+        career_matches = search_career_match(embedding, k=3)
+        
+        return {
+            "roadmap_suggestions": career_matches,
+            "primary_match": career_matches[0] if career_matches else None
+        }
+    except Exception as e:
+        print("--- ERROR IN /generate-roadmap/ ---")
+        traceback.print_exc()
+        print("-----------------------------")
+        raise HTTPException(status_code=500, detail=f"Error generating roadmap: {str(e)}")
+
+@app.post("/comprehensive-analysis/")
+async def comprehensive_analysis_endpoint(file: UploadFile = File(...)):
+    """
+    Comprehensive analysis combining resume parsing, career prediction via roadmap,
+    and learning path generation in a single endpoint.
+    """
+    try:
+        # Parse resume
+        raw = await file.read()
+        wrapper = _SyncUploadWrapper(file.filename, raw)
+        resume_text = parse_resume(wrapper)
+        
+        if not resume_text:
+            raise HTTPException(status_code=400, detail="Could not extract text from resume")
+        
+        # Generate roadmap based on resume
+        embedding = get_resume_embedding(resume_text)
+        career_matches = search_career_match(embedding, k=5)
+        
+        # Return comprehensive analysis
+        return {
+            "resume_text": resume_text,
+            "career_suggestions": career_matches,
+            "top_recommendation": career_matches[0] if career_matches else None,
+            "analysis_summary": {
+                "total_matches": len(career_matches),
+                "confidence_score": career_matches[0]['similarity_score'] if career_matches else 0
+            }
+        }
+    except Exception as e:
+        print("--- ERROR IN /comprehensive-analysis/ ---")
+        traceback.print_exc()
+        print("-----------------------------")
+        raise HTTPException(status_code=500, detail=f"Error in comprehensive analysis: {str(e)}")
