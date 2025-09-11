@@ -1,5 +1,5 @@
 # Specify Python version for deployment environments like Streamlit Cloud
-python==3.11
+# python==3.11
 
 # Core Web & App Frameworks
 fastapi==0.104.1
