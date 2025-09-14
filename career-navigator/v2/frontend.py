@@ -134,7 +134,7 @@ authenticator = stauth.Authenticate(
 initialize_session_state()
 
 # Fixed: Change to local backend URL
-API_BASE = os.getenv("API_BASE", "https://playground-pknf.onrender.com")
+API_BASE = os.getenv("API_BASE", "http://localhost:8000")
 
 # Enhanced CSS
 st.markdown(
@@ -714,7 +714,7 @@ def run_career_predictor():
 # --- MAIN APPLICATION ---
 if st.session_state.get("authentication_status"):
     # --- LOGGED-IN VIEW ---
-    st.title(f'Welcome Back {st.session_state["name"]}!')
+    # st.title(f'Welcome Back {st.session_state["name"]}!')
     authenticator.logout('Logout', 'sidebar')
     
     st.markdown('<div class="main-title">🚀 Future Trail | Career Navigator</div>', unsafe_allow_html=True)
