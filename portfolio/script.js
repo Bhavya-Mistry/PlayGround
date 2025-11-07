@@ -10,14 +10,19 @@ function initializePortfolio() {
     initCustomCursor();
     initTypingEffect();
     initLandingInteractions();
-    initPortfolioNavigation();
+    initPortfolioNavigation(); // This is the only nav function we need
     initScrollAnimations();
     initSkillBars();
     initChatbot();
-    initSmoothScrolling();
     
     // Initially disable body scroll
     document.body.style.overflow = 'hidden';
+
+    // *** FIX: Listen to the PORTFOLIO's scroll event for active links ***
+    const portfolio = document.getElementById('portfolio');
+    if (portfolio) {
+        portfolio.addEventListener('scroll', updateActiveNavigation);
+    }
 }
 
 // ==========================================
@@ -94,7 +99,7 @@ function initTypingEffect() {
     let isDeleting = false;
     const typingSpeed = 100;
     const deletingSpeed = 50;
-    const pauseDuration = 2000;
+    const pauseDuration = 700;
 
     function typeCommand() {
         const currentCommand = commands[commandIndex];
@@ -136,7 +141,7 @@ function initLandingInteractions() {
         landing.classList.add('hide');
         setTimeout(() => {
             portfolio.classList.add('show');
-            document.body.style.overflow = 'auto';
+            document.body.style.overflow = 'auto'; 
             document.body.style.cursor = 'auto';
             triggerScrollAnimations();
         }, 600);
@@ -153,57 +158,95 @@ function initLandingInteractions() {
 }
 
 // ==========================================
-// PORTFOLIO NAVIGATION
+// PORTFOLIO NAVIGATION (FIXED & CLEANED)
 // ==========================================
 function initPortfolioNavigation() {
-    document.querySelectorAll('[data-section]').forEach(link => {
-        link.addEventListener('click', (e) => {
-            e.preventDefault();
-            const targetId = e.target.getAttribute('data-section') || e.target.closest('[data-section]').getAttribute('data-section');
-            const targetSection = document.getElementById(targetId);
+    // This single listener handles all nav clicks robustly
+    document.body.addEventListener('click', function(e) {
+        
+        // Find the closest link (or button) that has a 'data-section' attribute
+        const navLink = e.target.closest('[data-section]');
+
+        // If we didn't click on a nav link, do nothing
+        if (!navLink) return;
+
+        // ** THIS IS THE FIX **
+        // We clicked a valid link, so prevent the default HTML jump (which changes the URL)
+        e.preventDefault(); 
+
+        const targetId = navLink.getAttribute('data-section');
+        const targetSection = document.getElementById(targetId);
+        
+        if (targetSection) {
+            const portfolio = document.getElementById('portfolio');
+            const enterBtn = document.getElementById('enterBtn');
             
-            if (targetSection) {
-                const portfolio = document.getElementById('portfolio');
-                const enterBtn = document.getElementById('enterBtn');
-                
-                if (!portfolio.classList.contains('show')) {
-                    enterBtn.click();
-                    setTimeout(() => {
-                        scrollToSection(targetSection);
-                    }, 800);
-                } else {
+            // Check if we are on the landing page
+            if (!portfolio.classList.contains('show')) {
+                // If on landing, click 'Enter' first, then scroll after a delay
+                enterBtn.click();
+                setTimeout(() => {
                     scrollToSection(targetSection);
-                }
+                }, 800); // Wait for portfolio to animate in
+            } else {
+                // If already in portfolio, just scroll
+                scrollToSection(targetSection);
             }
-        });
+        }
     });
 }
 
+// *** FIX: Scroll function that targets the .portfolio div ***
 function scrollToSection(section) {
-    const headerHeight = 100;
-    const elementPosition = section.offsetTop;
-    const offsetPosition = elementPosition - headerHeight;
+    const portfolioNav = document.querySelector('.portfolio-nav');
+    const portfolio = document.getElementById('portfolio');
+    
+    if (!section || !portfolio || !portfolioNav) return;
 
-    window.scrollTo({
+    const navHeight = portfolioNav.offsetHeight;
+    // Calculate position relative to the scrolling container (.portfolio)
+    const elementPosition = section.offsetTop; 
+    const offsetPosition = elementPosition - navHeight; // Adjust for fixed nav bar
+
+    // Scroll the .portfolio div, not the window
+    portfolio.scrollTo({
         top: offsetPosition,
         behavior: 'smooth'
     });
 }
 
-// ==========================================
-// SMOOTH SCROLLING
-// ==========================================
-function initSmoothScrolling() {
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener('click', function (e) {
-            e.preventDefault();
-            const targetId = this.getAttribute('href');
-            const targetElement = document.querySelector(targetId);
-            
-            if (targetElement) {
-                scrollToSection(targetElement);
-            }
-        });
+// *** FIX: Update active navigation item based on PORTFOLIO scroll ***
+function updateActiveNavigation() {
+    const portfolio = document.getElementById('portfolio');
+    const sections = document.querySelectorAll('.section');
+    const navLinks = document.querySelectorAll('.portfolio-nav-links a[data-section]');
+    const portfolioNav = document.querySelector('.portfolio-nav');
+    
+    if (!portfolio || !portfolioNav) return;
+
+    const navHeight = portfolioNav.offsetHeight;
+    // Get scroll position of the .portfolio div
+    const scrollPosition = portfolio.scrollTop; 
+
+    let currentSection = '';
+    
+    sections.forEach(section => {
+        const sectionTop = section.offsetTop - navHeight - 50; // 50px buffer
+        const sectionHeight = section.offsetHeight;
+        
+        if (scrollPosition >= sectionTop && scrollPosition < sectionTop + sectionHeight) {
+            currentSection = section.id;
+        }
+    });
+
+    // Update active nav link
+    navLinks.forEach(link => {
+        const linkSection = link.getAttribute('data-section');
+        if (linkSection === currentSection) {
+            link.classList.add('active');
+        } else {
+            link.classList.remove('active');
+        }
     });
 }
 
@@ -211,7 +254,10 @@ function initSmoothScrolling() {
 // SCROLL ANIMATIONS
 // ==========================================
 function initScrollAnimations() {
+    const portfolio = document.getElementById('portfolio');
+    
     const observerOptions = {
+        root: portfolio, // *** FIX: Observe items within the .portfolio div ***
         threshold: 0.1,
         rootMargin: '0px 0px -50px 0px'
     };
@@ -221,44 +267,37 @@ function initScrollAnimations() {
             if (entry.isIntersecting) {
                 entry.target.classList.add('visible');
                 
-                // Handle staggered animations for groups
                 if (entry.target.classList.contains('stats-grid')) {
                     animateStatsGrid(entry.target);
-                }
-                
-                if (entry.target.classList.contains('timeline')) {
+                } else if (entry.target.classList.contains('timeline')) {
                     animateTimeline(entry.target);
-                }
-                
-                if (entry.target.classList.contains('skills-grid')) {
+                } else if (entry.target.classList.contains('skills-grid')) {
                     animateSkillsGrid(entry.target);
-                }
-                
-                if (entry.target.classList.contains('projects-grid')) {
+                } else if (entry.target.classList.contains('projects-grid')) {
                     animateProjectsGrid(entry.target);
-                }
-                
-                if (entry.target.classList.contains('certifications-grid')) {
+                } else if (entry.target.classList.contains('certifications-grid')) {
                     animateCertificationsGrid(entry.target);
+                } else if (entry.target.classList.contains('contact-text')) {
+                    // Manually trigger siblings for contact section
+                    document.querySelector('.contact-links')?.classList.add('visible');
+                    document.querySelector('.contact-availability')?.classList.add('visible');
                 }
             }
         });
     }, observerOptions);
 
-    // Observe elements
+    // Observe all animated elements
     document.querySelectorAll('.section-number, .section-title, .about-text, .about-image, .stats-grid, .timeline, .skills-grid, .projects-grid, .certifications-grid, .contact-text, .contact-links, .contact-availability').forEach(el => {
         observer.observe(el);
     });
 }
 
 function triggerScrollAnimations() {
-    // Trigger animations for elements already in view
-    const elements = document.querySelectorAll('.section-number, .section-title');
-    elements.forEach((el, index) => {
-        setTimeout(() => {
-            el.classList.add('visible');
-        }, index * 100);
-    });
+    // Manually trigger the first section's elements on load
+    document.querySelector('#about .section-number')?.classList.add('visible');
+    document.querySelector('#about .section-title')?.classList.add('visible');
+    document.querySelector('#about .about-text')?.classList.add('visible');
+    document.querySelector('#about .about-image')?.classList.add('visible');
 }
 
 function animateStatsGrid(grid) {
@@ -311,7 +350,10 @@ function animateCertificationsGrid(grid) {
 // COUNTER ANIMATION
 // ==========================================
 function animateCounter(element) {
+    if (!element) return;
     const target = parseFloat(element.textContent.replace(/[^\d.]/g, ''));
+    if (isNaN(target)) return;
+
     const suffix = element.textContent.replace(/[\d.]/g, '');
     const duration = 2000;
     const increment = target / (duration / 16);
@@ -336,7 +378,10 @@ function animateCounter(element) {
 // SKILL BARS ANIMATION
 // ==========================================
 function initSkillBars() {
+    const portfolio = document.getElementById('portfolio');
+
     const observerOptions = {
+        root: portfolio, // *** FIX: Observe within the .portfolio div ***
         threshold: 0.5
     };
 
@@ -353,6 +398,7 @@ function initSkillBars() {
                         bar.style.width = progress + '%';
                     }, index * 200);
                 });
+                observer.unobserve(skillCategory); // Animate only once
             }
         });
     }, observerOptions);
@@ -363,7 +409,7 @@ function initSkillBars() {
 }
 
 // ==========================================
-// CHATBOT FUNCTIONALITY (Completed)
+// CHATBOT FUNCTIONALITY
 // ==========================================
 function initChatbot() {
     const chatBubble = document.getElementById('chatBubble');
@@ -372,6 +418,11 @@ function initChatbot() {
     const chatInput = document.getElementById('chatInput');
     const chatSend = document.getElementById('chatSend');
     const chatBody = document.getElementById('chatBody');
+
+    if (!chatBubble || !chatWindow || !chatClose || !chatInput || !chatSend || !chatBody) {
+        console.warn('Chatbot elements not found.');
+        return;
+    }
 
     // Toggle chat window visibility
     chatBubble.addEventListener('click', () => {
@@ -417,7 +468,11 @@ function initChatbot() {
         messageContent.className = 'message-content';
         
         // Use marked.js to parse markdown for richer responses
-        messageContent.innerHTML = marked.parse(message);
+        if (typeof marked !== 'undefined') {
+            messageContent.innerHTML = marked.parse(message);
+        } else {
+            messageContent.textContent = message; // Fallback if marked.js fails
+        }
         
         messageWrapper.appendChild(messageContent);
         chatBody.appendChild(messageWrapper);
