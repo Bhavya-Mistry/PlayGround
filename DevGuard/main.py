@@ -12,6 +12,6 @@ def root():
 
 @app.post("/webhook")
 async def github_webhook(request: Request):
-    payload = await request.json
+    payload = await request.json()
     print(payload)
     return {"status": "ok"}
