@@ -40,9 +40,9 @@ async def github_webhook(request: Request):
 
             if response.status_code == 200:
                 diff_text = response.text
-                print("---Diff received---")
+                print("-------------Diff received-------------")
                 print(diff_text)
-                print("-------------------")
+                print("---------------------------------------")
             else:
                 print(f"error fetching diff:{response.status_code}")
     return {"status": "ok"}
