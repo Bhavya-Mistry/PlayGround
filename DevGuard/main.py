@@ -13,5 +13,11 @@ def root():
 @app.post("/webhook")
 async def github_webhook(request: Request):
     payload = await request.json()
-    print(payload)
+    action = payload.get("action")
+    if action == "opened":
+        pr_number = payload.get("repository", {})
+        repo_name = payload.get("repository", {})
+        print(f"New PR {pr_number} opened in {repo_name}")
+    else:
+        print("Event Ignored")
     return {"status": "ok"}
