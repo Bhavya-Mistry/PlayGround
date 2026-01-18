@@ -31,7 +31,7 @@ async def github_webhook(request: Request):
         token = os.getenv("GITHUB_TOKEN")
 
         headers = {
-            "Authorization": f"Bear {token}",
+            "Authorization": f"Bearer {token}",
             "Accept": "application/vnd.github.v3.diff",
         }
 
@@ -62,7 +62,7 @@ async def github_webhook(request: Request):
             if response.status_code == 200:
                 print("Analyzing code with AI...")
 
-                chat_completion = await ai_client.chat.completions(
+                chat_completion = await ai_client.chat.completions.create(
                     messages=[
                         {"role": "system", "content": system_prompt},
                         {
@@ -76,7 +76,7 @@ async def github_webhook(request: Request):
 
                 review_content = chat_completion.choices[0].message.content
 
-                print("----------------------AI review----------------------")
+                print("----------------------AI review----------------------\n\n")
                 print(review_content)
                 print("-----------------------------------------------------")
     return {"status": "ok"}
