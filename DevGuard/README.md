@@ -29,7 +29,7 @@
 * **AI Engine:** Groq (Llama 3.1-8b-instant)
 * **Database:** PostgreSQL (Supabase)
 * **Infrastructure:** Render (Cloud Hosting)
-* **Frontend:** HTML5, CSS3, JavaScript (Vanilla)
+* **Frontend:** Streamlit
 
 ## 🔧 Setup & Installation
 
