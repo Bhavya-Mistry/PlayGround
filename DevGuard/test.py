@@ -1,0 +1,2 @@
+def passa():
+    pass
