@@ -1,2 +1,2 @@
 def passa():
-    print("main")
+    print("three")
