@@ -43,8 +43,8 @@
 
 1.  **Clone the repository**
     ```bash
-    git clone [https://github.com/your-username/devguard.git](https://github.com/your-username/devguard.git)
-    cd devguard
+    git clone [https://github.com/Bhavya-Mistry/Playground/DevGuard.git](https://github.com/Bhavya-Mistry/Playground/DevGuard.git)
+    cd DevGuard
     ```
 
 2.  **Install dependencies**
