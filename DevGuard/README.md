@@ -64,10 +64,3 @@
     ```bash
     uvicorn main:app --reload
     ```
-
-## 📸 Screenshots
-
-*(Add screenshots of your Dashboard and a GitHub PR comment here)*
-
----
-*Built with ❤️ by [Your Name]*
