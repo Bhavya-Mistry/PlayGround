@@ -1,16 +1,45 @@
-from fastapi import FastAPI, Request
-import os
+from fastapi import FastAPI, Request, HTTPException, Header
 from dotenv import load_dotenv
-import httpx
 from groq import AsyncGroq
 from database import SessionLocal, Review, init_db
 from icecream import ic
+import hmac
+import hashlib
+import httpx
+import os
 
 load_dotenv()
 
 init_db()
 
 app = FastAPI()
+
+
+async def verify_signature(request: Request):
+    # 1. Get the signature from the header
+    signature = request.headers.get("X-Hub-Signature-256")
+    if not signature:
+        raise HTTPException(status_code=403, detail="Missing signature")
+
+    # 2. Get the raw body
+    body = await request.body()
+
+    # 3. Get the secret
+    secret = os.getenv("GITHUB_WEBHOOK_SECRET")
+
+    # 4. Create our own signature (The Math Part)
+    # We hash the body with the secret using SHA256
+    expected_signature = (
+        "sha256="
+        + hmac.new(key=secret.encode(), msg=body, digestmod=hashlib.sha256).hexdigest()
+    )
+
+    # 5. Compare
+    # We use compare_digest to prevent "timing attacks"
+    if not hmac.compare_digest(expected_signature, signature):
+        raise HTTPException(status_code=403, detail="Invalid signature")
+
+    return True
 
 
 @app.get("/")
@@ -22,6 +51,9 @@ def root():
 
 @app.post("/webhook")
 async def github_webhook(request: Request):
+
+    await verify_signature(request)
+
     payload = await request.json()
     action = payload.get("action")
     if action == "opened":
