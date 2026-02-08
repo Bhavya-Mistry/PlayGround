@@ -26,26 +26,19 @@ app = FastAPI()
 
 
 async def verify_signature(request: Request):
-    # 1. Get the signature from the header
     signature = request.headers.get("X-Hub-Signature-256")
     if not signature:
         raise HTTPException(status_code=403, detail="Missing signature")
 
-    # 2. Get the raw body
     body = await request.body()
 
-    # 3. Get the secret
     secret = os.getenv("GITHUB_WEBHOOK_SECRET")
 
-    # 4. Create our own signature (The Math Part)
-    # We hash the body with the secret using SHA256
     expected_signature = (
         "sha256="
         + hmac.new(key=secret.encode(), msg=body, digestmod=hashlib.sha256).hexdigest()
     )
 
-    # 5. Compare
-    # We use compare_digest to prevent "timing attacks"
     if not hmac.compare_digest(expected_signature, signature):
         raise HTTPException(status_code=403, detail="Invalid signature")
 
@@ -61,10 +54,9 @@ def root():
 
 @app.get("/reviews", response_model=List[ReviewResponse])
 def get_reviews():
-    # Open the connection
+
     db = SessionLocal()
     try:
-        # Fetch the last 10 reviews, newest first
         reviews = db.query(Review).order_by(Review.created_at.desc()).limit(10).all()
         return reviews
     finally:
