@@ -1,12 +1,13 @@
 from fastapi import FastAPI, Request, HTTPException, Header
 from dotenv import load_dotenv
 from groq import AsyncGroq
-from database import SessionLocal, Review, init_db
+from database import SessionLocal, Review, init_db, ReviewResponse
 from icecream import ic
 import hmac
 import hashlib
 import httpx
 import os
+from typing import List
 
 load_dotenv()
 
@@ -47,6 +48,18 @@ def root():
     return {
         "message": "Hello, this is my project, you are not meant to see this but if you end up here then let me know ;)"
     }
+
+
+@app.get("/reviews", response_model=List[ReviewResponse])
+def get_reviews():
+    # Open the connection
+    db = SessionLocal()
+    try:
+        # Fetch the last 10 reviews, newest first
+        reviews = db.query(Review).order_by(Review.created_at.desc()).limit(10).all()
+        return reviews
+    finally:
+        db.close()
 
 
 @app.post("/webhook")
