@@ -79,4 +79,17 @@ async def github_webhook(request: Request):
                 print("----------------------AI review----------------------\n\n")
                 print(review_content)
                 print("-----------------------------------------------------")
+
+                comment_url = f"https://api.github.com/repos/{repo_name}/issues/{pr_number}/comments"
+
+                comment_payload = {"body": review_content}
+
+                comment_headers = {"Authorization": f"Bearer {token}"}
+
+                comment_response = await client.post(
+                    comment_url, json=comment_payload, headers=comment_headers
+                )
+
+                print(f"Comment posted status: {comment_response.status_code}")
+
     return {"status": "ok"}
