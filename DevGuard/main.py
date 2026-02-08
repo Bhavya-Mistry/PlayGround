@@ -8,12 +8,21 @@ import hashlib
 import httpx
 import os
 from typing import List
+# from fastapi.middleware.cors import CORSMiddleware
 
 load_dotenv()
 
 init_db()
 
 app = FastAPI()
+
+# app.add_middleware(
+#     CORSMiddleware,
+#     allow_origins=["*"],  # Allows all origins (for development)
+#     allow_credentials=True,
+#     allow_methods=["*"],  # Allows all methods (GET, POST, etc.)
+#     allow_headers=["*"],  # Allows all headers
+# )
 
 
 async def verify_signature(request: Request):
