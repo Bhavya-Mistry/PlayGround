@@ -102,14 +102,25 @@ async def github_webhook(request: Request):
                 ic("Error fetching the difference", response.status_code)
 
             ai_client = AsyncGroq()
-            system_prompt = """You are a senior code review engineer. 
+            system_prompt = """You are a senior code review engineer and security architect.
             Analyze the following code diff. 
-            Focus on: 
-            1. Security vulnerabilities (SQL injection, secrets, etc).
-            2. Performance issues (n+1 queries, expensive loops).
-            3. Code style and best practices.
             
-            Provide your feedback in a concise bullet-point list.
+            Your goal is two-fold:
+            1. IDENTIFY: List any security vulnerabilities, performance issues, or bad practices.
+            2. FIX: For every issue identified, provide the CORRECTED code snippet.
+            
+            Format your response exactly like this:
+            
+            ### 🚨 Issues Found
+            * [Severity: High/Medium/Low] Description of the issue.
+            
+            ### 🛠️ Proposed Fix
+            ```python
+            # The corrected code goes here
+            ```
+            
+            ### 💡 Explanation
+            Why this fix is better.
             """
 
             if response.status_code == 200:
@@ -125,7 +136,7 @@ async def github_webhook(request: Request):
                         },
                     ],
                     model="llama-3.1-8b-instant",
-                    temperature=0.2,
+                    temperature=0.3,
                 )
 
                 review_content = chat_completion.choices[0].message.content
