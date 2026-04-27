@@ -3,3 +3,6 @@ __pycache__/
 *.pyc
 .env
 .DS_Store
+projectX/chatbot/client_scret.json.json
+projectX/chatbot/token.pickle
+projectX/credentials.json

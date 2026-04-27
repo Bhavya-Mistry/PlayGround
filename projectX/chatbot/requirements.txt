@@ -1,0 +1,14 @@
+chromadb==0.4.24
+langchain==0.1.14
+langchain-groq==0.1.6
+sentence-transformers==2.2.2
+transformers==4.36.0
+google-auth-oauthlib==1.2.0
+google-auth-httplib2==0.2.0
+google-api-python-client==2.107.0
+discord.py==2.3.2
+python-dotenv==1.0.0
+supabase==2.4.0
+uvicorn==0.25.0
+fastapi==0.109.0
+requests==2.31.0
