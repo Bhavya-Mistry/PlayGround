@@ -1,374 +1,348 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>For Kannu 🌸 - Refactored</title>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&family=Cinzel+Decorative:wght@400;700&family=Lato:wght@300;400&display=swap" rel="stylesheet"/>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>For Kannu 🌸</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&family=Cinzel+Decorative:wght@400;700&family=Lato:wght@300;400&display=swap" rel="stylesheet">
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
   :root {
-    --bg-deep: #0a0206;
-    --bg-nebula: #2b0818;
+    --bg-dark: #0a0206;
+    --bg-glow: #2b0818;
     --text-main: #fff0f5;
     --text-soft: #f8c4d5;
-    --rose-glow: rgba(232, 81, 122, 0.4);
+    --rose-color: #e8517a;
   }
 
-  html, body {
-    width: 100%;
-    height: 100dvh; /* Fixes mobile scrollbar issues */
+  body, html {
+    width: 100%; height: 100%;
     overflow: hidden;
-    background: radial-gradient(circle at 50% 100%, var(--bg-nebula) 0%, var(--bg-deep) 80%);
+    background: radial-gradient(circle at 50% 80%, var(--bg-glow) 0%, var(--bg-dark) 100%);
     font-family: 'Lato', sans-serif;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
   }
 
-  /* Starfield */
-  #stars { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+  /* --- Background Elements --- */
+  #stars-container { position: fixed; inset: 0; z-index: 1; pointer-events: none; }
   .star {
-    position: absolute;
-    background: #fff;
-    border-radius: 50%;
-    animation: twinkle linear infinite;
-    box-shadow: 0 0 8px #fff;
+    position: absolute; background: white; border-radius: 50%;
+    animation: twinkle linear infinite; box-shadow: 0 0 8px rgba(255,255,255,0.8);
   }
   @keyframes twinkle {
-    0%, 100% { opacity: 0.2; transform: scale(0.8); }
+    0%, 100% { opacity: 0.1; transform: scale(0.5); }
     50% { opacity: 1; transform: scale(1.2); }
   }
 
-  /* The Scene */
-  #scene {
-    position: relative;
-    z-index: 2;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: flex-end;
-    animation: float 6s ease-in-out infinite;
-  }
-  @keyframes float {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-12px); }
+  .glow-aura {
+    position: fixed; bottom: -10vh; left: 50%; transform: translateX(-50%);
+    width: 60vw; height: 50vh; border-radius: 50%;
+    background: radial-gradient(ellipse, rgba(232, 81, 122, 0.15) 0%, transparent 70%);
+    filter: blur(40px); z-index: 2; opacity: 0; transition: opacity 3s ease;
   }
 
-  /* SVG Bouquet Container */
-  #bouquet-svg {
-    width: min(650px, 95vw);
-    max-height: 80vh;
-    filter: drop-shadow(0 10px 25px rgba(0,0,0,0.5));
-    transition: filter 2s ease;
-  }
-
-  /* --- Unbreakable Animation Classes --- */
-  .anim-item {
-    opacity: 0;
-    transform: scale(0);
-    /* 0,0 is the center of the translated object in the SVG */
-    transform-origin: 0 0; 
-    transition: transform 2s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 1.5s ease;
-  }
-  
-  .stem-item {
-    opacity: 0;
-    transition: opacity 1.5s ease;
-  }
-
-  /* When the 'bloom' class is added to the SVG, everything triggers based on their inline delay */
-  svg.bloom .anim-item {
-    opacity: 1;
-    transform: scale(var(--scale, 1)) rotate(var(--rot, 0deg));
-  }
-  svg.bloom .stem-item {
-    opacity: 1;
-  }
-
-  /* Typography */
-  #text-block {
-    position: fixed; top: 10vh; left: 0; right: 0;
-    text-align: center; z-index: 5; pointer-events: none;
+  /* --- Typography --- */
+  #text-container {
+    position: fixed; top: 12vh; left: 0; right: 0;
+    text-align: center; z-index: 10; pointer-events: none;
   }
   .tagline {
-    font-family: 'Cinzel Decorative', serif;
-    font-size: clamp(0.7rem, 2vw, 1rem);
-    letter-spacing: 0.3em; color: var(--text-soft);
-    opacity: 0; transform: translateY(-10px);
-    transition: all 1.5s ease; text-transform: uppercase;
+    font-family: 'Cinzel Decorative', serif; font-size: clamp(0.7rem, 2vw, 1rem);
+    letter-spacing: 0.3em; color: var(--text-soft); text-transform: uppercase;
+    opacity: 0; transform: translateY(-15px); transition: all 1.5s ease;
   }
   .headline {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: clamp(3rem, 10vw, 5.5rem); font-style: italic;
-    color: var(--text-main); line-height: 1;
-    opacity: 0; transform: translateY(15px);
-    transition: all 2s ease 0.5s;
-    text-shadow: 0 0 20px var(--rose-glow);
+    font-family: 'Cormorant Garamond', serif; font-size: clamp(3rem, 10vw, 5rem);
+    font-style: italic; color: var(--text-main); line-height: 1.1;
+    opacity: 0; transform: translateY(20px); transition: all 1.5s ease 0.5s;
+    text-shadow: 0 0 20px rgba(232, 81, 122, 0.4); margin-top: 10px;
   }
-  .sub {
+  .subtext {
     font-family: 'Cormorant Garamond', serif; font-size: clamp(1.2rem, 3vw, 1.5rem);
     font-style: italic; color: var(--text-soft);
-    opacity: 0; transform: translateY(10px);
-    transition: all 1.5s ease 1s; margin-top: 10px;
+    opacity: 0; transform: translateY(10px); transition: all 1.5s ease 1s; margin-top: 10px;
   }
-  .show { opacity: 1; transform: translateY(0); }
+  .show-text { opacity: 1 !important; transform: translateY(0) !important; }
 
-  /* Button */
+  /* --- Start Button --- */
   #start-btn {
     position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-    z-index: 20; background: rgba(232, 81, 122, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.4); color: #fff;
-    font-family: 'Cinzel Decorative', serif; letter-spacing: 0.2em;
-    padding: 1rem 2.5rem; border-radius: 50px; cursor: pointer;
-    backdrop-filter: blur(5px); box-shadow: 0 0 20px rgba(232, 81, 122, 0.3);
-    transition: all 0.4s ease; font-size: 1rem;
+    z-index: 20; background: rgba(232, 81, 122, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.3); color: white;
+    font-family: 'Cinzel Decorative', serif; font-size: 1rem; letter-spacing: 0.2em;
+    padding: 1.2rem 3rem; border-radius: 50px; cursor: pointer;
+    backdrop-filter: blur(8px); box-shadow: 0 0 20px rgba(232, 81, 122, 0.2);
+    transition: all 0.4s ease;
   }
-  #start-btn:hover { background: rgba(232, 81, 122, 0.3); transform: translate(-50%, -50%) scale(1.05); }
+  #start-btn:hover { background: rgba(232, 81, 122, 0.2); transform: translate(-50%, -50%) scale(1.05); }
 
-  /* Simple Falling Petals */
+  /* --- SVG Canvas --- */
+  #bouquet {
+    position: relative; z-index: 5;
+    width: min(700px, 95vw); max-height: 80vh;
+    transform: translateY(20px);
+    animation: gentle-float 6s ease-in-out infinite;
+  }
+  @keyframes gentle-float {
+    0%, 100% { transform: translateY(20px); }
+    50% { transform: translateY(5px); }
+  }
+
+  /* --- Bulletproof Animation Classes --- */
+  .anim-stem, .anim-wrapper {
+    stroke-dasharray: 1500; stroke-dashoffset: 1500; opacity: 0;
+  }
+  .anim-flower, .anim-leaf {
+    opacity: 0; transform: scale(0) rotate(-45deg);
+  }
+
+  /* Activation rules */
+  body.magic-active .anim-wrapper {
+    opacity: 1; transition: opacity 2s ease var(--d);
+  }
+  body.magic-active .anim-stem {
+    opacity: 1;
+    animation: drawLine 2s ease forwards;
+    animation-delay: var(--d);
+  }
+  body.magic-active .anim-leaf {
+    animation: popScale 1.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    animation-delay: var(--d);
+  }
+  body.magic-active .anim-flower {
+    /* Safe CSS scaling from the true 0,0 center of the group */
+    animation: popScale 2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    animation-delay: var(--d);
+  }
+  body.magic-active .glow-aura { opacity: 1; }
+
+  @keyframes drawLine { to { stroke-dashoffset: 0; } }
+  @keyframes popScale {
+    0% { opacity: 0; transform: scale(0) rotate(-45deg); }
+    100% { opacity: 1; transform: scale(var(--s)) rotate(0deg); }
+  }
+
+  /* --- Falling Petals --- */
   .falling-petal {
-    position: fixed; width: 14px; height: 14px;
-    background: #e8517a; border-radius: 50% 0 50% 0;
-    opacity: 0; pointer-events: none; z-index: 10;
-    animation: fall linear forwards;
-    box-shadow: 0 0 10px rgba(232, 81, 122, 0.4);
+    position: fixed; top: -50px; z-index: 15;
+    width: 14px; height: 16px; border-radius: 50% 0 50% 0;
+    pointer-events: none; animation: fall linear forwards;
+    opacity: 0; box-shadow: 0 0 10px rgba(232, 81, 122, 0.4);
   }
   @keyframes fall {
-    0% { opacity: 0; transform: translateY(-50px) rotate(0deg); }
+    0% { opacity: 0; transform: translateY(0) rotate(0deg) scale(0.8); }
     10% { opacity: 0.8; }
-    90% { opacity: 0.6; }
-    100% { opacity: 0; transform: translateY(105vh) rotate(360deg); }
+    90% { opacity: 0.5; }
+    100% { opacity: 0; transform: translateY(110vh) rotate(360deg) scale(1); }
   }
 
-  /* Verse */
   #verse {
-    position: fixed; bottom: 20px; left: 0; right: 0;
-    text-align: center; z-index: 6; pointer-events: none;
-    opacity: 0; transition: opacity 2s ease 2s;
-  }
-  #verse p {
+    position: fixed; bottom: 30px; width: 100%; text-align: center;
     font-family: 'Cormorant Garamond', serif; font-style: italic;
-    font-size: 1.2rem; color: rgba(255, 255, 255, 0.7);
+    color: rgba(255,255,255,0.6); font-size: 1.1rem;
+    opacity: 0; transition: opacity 2s ease 2s; z-index: 10;
   }
-  #verse.show { opacity: 1; }
-  
-  /* Background glow */
-  #glow-ring {
-    position: absolute; bottom: 10%; left: 50%; transform: translateX(-50%);
-    width: 60vw; height: 40vh; border-radius: 50%;
-    background: radial-gradient(circle, var(--rose-glow) 0%, transparent 60%);
-    opacity: 0; transition: opacity 3s ease; pointer-events: none; z-index: 1;
-  }
-  #glow-ring.visible { opacity: 1; }
 </style>
 </head>
 <body>
 
-<div id="stars"></div>
-<div id="glow-ring"></div>
+<div id="stars-container"></div>
+<div class="glow-aura"></div>
 
-<div id="text-block">
-  <p class="tagline" id="tag">With all my love</p>
-  <h1 class="headline" id="headline">For You, Kannu</h1>
-  <p class="sub" id="sub">A garden built to never fade ✧</p>
+<div id="text-container">
+  <p class="tagline" id="t1">With all my love</p>
+  <h1 class="headline" id="t2">For You, Kannu</h1>
+  <p class="subtext" id="t3">A beautiful bloom, just for you ✧</p>
 </div>
 
-<button id="start-btn" onclick="beginMagic()">Tap to Bloom ✦</button>
+<button id="start-btn" onclick="startMagic()">Awaken ✦</button>
 
-<div id="scene">
-  <svg id="bouquet-svg" viewBox="0 0 800 800" xmlns="http://www.w3.org/2000/svg">
-    <defs>
-      <!-- Gradients for realistic depth -->
-      <linearGradient id="stem-grad" x1="0%" y1="0%" x2="100%" y2="0%">
-        <stop offset="0%" stop-color="#193b22"/><stop offset="50%" stop-color="#2d6a3d"/><stop offset="100%" stop-color="#193b22"/>
-      </linearGradient>
-      <linearGradient id="wrap-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" stop-color="#591330"/><stop offset="50%" stop-color="#8c204b"/><stop offset="100%" stop-color="#3d0a1f"/>
-      </linearGradient>
+<!-- Completely Refactored SVG -->
+<svg id="bouquet" viewBox="0 0 800 800" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Gradients -->
+    <linearGradient id="stemGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#245131"/>
+      <stop offset="50%" stop-color="#3c824f"/>
+      <stop offset="100%" stop-color="#245131"/>
+    </linearGradient>
+    <linearGradient id="wrapGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#691538"/>
+      <stop offset="50%" stop-color="#992354"/>
+      <stop offset="100%" stop-color="#4d0e28"/>
+    </linearGradient>
+    
+    <!-- Core Petal Geometry (Mathematically centered at 0,0) -->
+    <g id="base-petal">
+      <path d="M 0,0 C -35,-25 -45,-80 0,-100 C 45,-80 35,-25 0,0 Z" />
+    </g>
 
-      <!-- Rose Petal Gradients -->
-      <radialGradient id="r-grad-base" cx="50%" cy="50%" r="50%">
-        <stop offset="50%" stop-color="#c21e56"/><stop offset="100%" stop-color="#690a29"/>
-      </radialGradient>
-      <radialGradient id="r-grad-mid" cx="50%" cy="50%" r="50%">
-        <stop offset="30%" stop-color="#e8517a"/><stop offset="100%" stop-color="#a81544"/>
-      </radialGradient>
-      <radialGradient id="r-grad-top" cx="50%" cy="50%" r="50%">
-        <stop offset="0%" stop-color="#ff9eb5"/><stop offset="100%" stop-color="#d43360"/>
-      </radialGradient>
-
-      <!-- MASTER ROSE SYMBOL - perfectly centered at 0,0 -->
-      <!-- Drawing it once symmetrically ensures it never breaks or misaligns -->
-      <g id="master-rose">
-        <!-- Base shadow shadow -->
-        <circle cx="0" cy="0" r="85" fill="rgba(0,0,0,0.3)" filter="blur(5px)"/>
-        
-        <!-- Outer Layer -->
-        <g fill="url(#r-grad-base)">
-          <path d="M0,15 C-60,-20 -80,-90 0,-100 C80,-90 60,-20 0,15 Z" />
-          <path d="M0,15 C-60,-20 -80,-90 0,-100 C80,-90 60,-20 0,15 Z" transform="rotate(72)" />
-          <path d="M0,15 C-60,-20 -80,-90 0,-100 C80,-90 60,-20 0,15 Z" transform="rotate(144)" />
-          <path d="M0,15 C-60,-20 -80,-90 0,-100 C80,-90 60,-20 0,15 Z" transform="rotate(216)" />
-          <path d="M0,15 C-60,-20 -80,-90 0,-100 C80,-90 60,-20 0,15 Z" transform="rotate(288)" />
-        </g>
-        
-        <!-- Middle Layer -->
-        <g fill="url(#r-grad-mid)" transform="rotate(36) scale(0.8)">
-          <path d="M0,15 C-50,-20 -70,-85 0,-95 C70,-85 50,-20 0,15 Z" />
-          <path d="M0,15 C-50,-20 -70,-85 0,-95 C70,-85 50,-20 0,15 Z" transform="rotate(72)" />
-          <path d="M0,15 C-50,-20 -70,-85 0,-95 C70,-85 50,-20 0,15 Z" transform="rotate(144)" />
-          <path d="M0,15 C-50,-20 -70,-85 0,-95 C70,-85 50,-20 0,15 Z" transform="rotate(216)" />
-          <path d="M0,15 C-50,-20 -70,-85 0,-95 C70,-85 50,-20 0,15 Z" transform="rotate(288)" />
-        </g>
-
-        <!-- Inner Layer -->
-        <g fill="url(#r-grad-top)" transform="rotate(15) scale(0.55)">
-          <path d="M0,15 C-45,-20 -60,-80 0,-90 C60,-80 45,-20 0,15 Z" />
-          <path d="M0,15 C-45,-20 -60,-80 0,-90 C60,-80 45,-20 0,15 Z" transform="rotate(72)" />
-          <path d="M0,15 C-45,-20 -60,-80 0,-90 C60,-80 45,-20 0,15 Z" transform="rotate(144)" />
-          <path d="M0,15 C-45,-20 -60,-80 0,-90 C60,-80 45,-20 0,15 Z" transform="rotate(216)" />
-          <path d="M0,15 C-45,-20 -60,-80 0,-90 C60,-80 45,-20 0,15 Z" transform="rotate(288)" />
-        </g>
-
-        <!-- Center Bud -->
-        <g fill="#ffcce0" transform="scale(0.3)">
-          <path d="M0,10 C-30,-20 -40,-70 0,-80 C40,-70 30,-20 0,10 Z" />
-          <path d="M0,10 C-30,-20 -40,-70 0,-80 C40,-70 30,-20 0,10 Z" transform="rotate(120)" />
-          <path d="M0,10 C-30,-20 -40,-70 0,-80 C40,-70 30,-20 0,10 Z" transform="rotate(240)" />
-        </g>
+    <!-- Master Rose Component -->
+    <!-- Built concentrically around 0,0 to prevent ANY breaking/shifting -->
+    <g id="master-rose">
+      <!-- Outer Layer -->
+      <g fill="#9e1540">
+        <use href="#base-petal" transform="rotate(0)" />
+        <use href="#base-petal" transform="rotate(72)" />
+        <use href="#base-petal" transform="rotate(144)" />
+        <use href="#base-petal" transform="rotate(216)" />
+        <use href="#base-petal" transform="rotate(288)" />
       </g>
-
-      <!-- Leaf Symbol -->
-      <g id="leaf">
-        <path d="M0,0 Q-20,-20 0,-50 Q20,-20 0,0 Z" fill="#2d6a3d"/>
-        <line x1="0" y1="0" x2="0" y2="-45" stroke="#193b22" stroke-width="2"/>
+      <!-- Mid Layer -->
+      <g fill="#d62d60" transform="scale(0.7) rotate(36)">
+        <use href="#base-petal" transform="rotate(0)" />
+        <use href="#base-petal" transform="rotate(72)" />
+        <use href="#base-petal" transform="rotate(144)" />
+        <use href="#base-petal" transform="rotate(216)" />
+        <use href="#base-petal" transform="rotate(288)" />
       </g>
-    </defs>
-
-    <!-- STEMS (Appear first) -->
-    <g class="stem-item" style="transition-delay: 0s;">
-      <path d="M400,750 Q400,500 400,300" stroke="url(#stem-grad)" stroke-width="12" fill="none"/>
-      <path d="M400,700 Q350,500 250,380" stroke="url(#stem-grad)" stroke-width="10" fill="none"/>
-      <path d="M400,700 Q450,500 550,380" stroke="url(#stem-grad)" stroke-width="10" fill="none"/>
-      <path d="M400,650 Q300,500 200,450" stroke="url(#stem-grad)" stroke-width="8" fill="none"/>
-      <path d="M400,650 Q500,500 600,450" stroke="url(#stem-grad)" stroke-width="8" fill="none"/>
+      <!-- Inner Layer -->
+      <g fill="#f2638e" transform="scale(0.4) rotate(15)">
+        <use href="#base-petal" transform="rotate(0)" />
+        <use href="#base-petal" transform="rotate(72)" />
+        <use href="#base-petal" transform="rotate(144)" />
+        <use href="#base-petal" transform="rotate(216)" />
+        <use href="#base-petal" transform="rotate(288)" />
+      </g>
+      <!-- Center Bud -->
+      <circle cx="0" cy="0" r="12" fill="#ffb8cc" />
     </g>
 
-    <!-- LEAVES (Bloom sequentially) -->
-    <g transform="translate(400, 400)" class="anim-item" style="--scale: 1.2; --rot: -45deg; --delay: 0.3s; transition-delay: 0.3s;"><use href="#leaf"/></g>
-    <g transform="translate(400, 420)" class="anim-item" style="--scale: 1.2; --rot: 45deg; --delay: 0.4s; transition-delay: 0.4s;"><use href="#leaf"/></g>
-    <g transform="translate(280, 430)" class="anim-item" style="--scale: 1; --rot: -60deg; --delay: 0.5s; transition-delay: 0.5s;"><use href="#leaf"/></g>
-    <g transform="translate(520, 430)" class="anim-item" style="--scale: 1; --rot: 60deg; --delay: 0.6s; transition-delay: 0.6s;"><use href="#leaf"/></g>
-
-    <!-- WRAPPER CONE (Slides/Fades in) -->
-    <g class="stem-item" style="transition-delay: 0.5s;">
-      <!-- Cone -->
-      <path d="M400,780 L220,480 Q400,520 580,480 Z" fill="url(#wrap-grad)"/>
-      <!-- Top Fold Highlight -->
-      <path d="M220,480 Q400,520 580,480" fill="none" stroke="#e8517a" stroke-width="4" opacity="0.8"/>
-      <!-- Ribbon -->
-      <rect x="375" y="550" width="50" height="20" rx="5" fill="#e8517a"/>
-      <!-- Bow -->
-      <path d="M400,560 Q340,530 350,570 Q360,600 400,560" fill="#c21e56"/>
-      <path d="M400,560 Q460,530 450,570 Q440,600 400,560" fill="#c21e56"/>
-      <path d="M380,560 L360,650 L390,640 Z" fill="#a81544"/>
-      <path d="M420,560 L440,650 L410,640 Z" fill="#a81544"/>
+    <!-- Simple Leaf -->
+    <g id="master-leaf">
+      <path d="M 0,0 C -20,-20 0,-60 0,-60 C 0,-60 20,-20 0,0 Z" fill="#2d6a3d" />
+      <line x1="0" y1="0" x2="0" y2="-55" stroke="#1a4023" stroke-width="1.5" />
     </g>
+  </defs>
 
-    <!-- ROSES (Placed mathematically, bloomed with absolute precision) -->
-    <!-- Far Left -->
-    <g transform="translate(200, 400)" class="anim-item" style="--scale: 0.6; --rot: -20deg; transition-delay: 1.2s;"><use href="#master-rose"/></g>
-    <!-- Far Right -->
-    <g transform="translate(600, 400)" class="anim-item" style="--scale: 0.6; --rot: 20deg; transition-delay: 1.4s;"><use href="#master-rose"/></g>
-    
-    <!-- Mid Left -->
-    <g transform="translate(280, 320)" class="anim-item" style="--scale: 0.85; --rot: -10deg; transition-delay: 1.6s;"><use href="#master-rose"/></g>
-    <!-- Mid Right -->
-    <g transform="translate(520, 320)" class="anim-item" style="--scale: 0.85; --rot: 10deg; transition-delay: 1.8s;"><use href="#master-rose"/></g>
-    
-    <!-- Bottom Center -->
-    <g transform="translate(400, 410)" class="anim-item" style="--scale: 0.95; --rot: 45deg; transition-delay: 2.0s;"><use href="#master-rose"/></g>
-    
-    <!-- Top Queen Center Rose (Largest) -->
-    <g transform="translate(400, 240)" class="anim-item" style="--scale: 1.25; --rot: 0deg; transition-delay: 2.4s;"><use href="#master-rose"/></g>
+  <!-- STEMS -->
+  <g class="anim-stem" style="--d: 0.1s;" fill="none" stroke="url(#stemGrad)" stroke-linecap="round">
+    <path d="M 400,800 Q 400,600 400,350" stroke-width="12" /> <!-- Center -->
+    <path d="M 400,700 Q 300,550 240,400" stroke-width="9" />  <!-- Far Left -->
+    <path d="M 400,700 Q 500,550 560,400" stroke-width="9" />  <!-- Far Right -->
+    <path d="M 400,750 Q 340,600 300,480" stroke-width="7" />  <!-- Mid Left -->
+    <path d="M 400,750 Q 460,600 500,480" stroke-width="7" />  <!-- Mid Right -->
+  </g>
 
-    <!-- Little filler buds (Baby's breath) -->
-    <g class="anim-item" style="--scale: 1; transition-delay: 2.8s;">
-      <circle cx="320" cy="220" r="6" fill="#fff" opacity="0.8"/>
-      <circle cx="300" cy="240" r="5" fill="#f8c4d5" opacity="0.8"/>
-      <circle cx="480" cy="220" r="6" fill="#fff" opacity="0.8"/>
-      <circle cx="500" cy="240" r="5" fill="#f8c4d5" opacity="0.8"/>
+  <!-- LEAVES -->
+  <!-- Position logic: Move the group, then scale the inner element to prevent shifting -->
+  <g transform="translate(390, 500)"><g class="anim-leaf" style="--s: 1.2; --d: 0.5s; transform-origin: 0 0;"><use href="#master-leaf" transform="rotate(-40)"/></g></g>
+  <g transform="translate(410, 520)"><g class="anim-leaf" style="--s: 1.2; --d: 0.6s; transform-origin: 0 0;"><use href="#master-leaf" transform="rotate(40)"/></g></g>
+  <g transform="translate(340, 580)"><g class="anim-leaf" style="--s: 1; --d: 0.7s; transform-origin: 0 0;"><use href="#master-leaf" transform="rotate(-60)"/></g></g>
+  <g transform="translate(460, 580)"><g class="anim-leaf" style="--s: 1; --d: 0.8s; transform-origin: 0 0;"><use href="#master-leaf" transform="rotate(60)"/></g></g>
+
+  <!-- BOUQUET WRAPPER -->
+  <g class="anim-wrapper" style="--d: 0.5s;">
+    <!-- Paper Cone -->
+    <path d="M 400,850 L 220,550 Q 400,580 580,550 Z" fill="url(#wrapGrad)" />
+    <!-- Ribbon Bow -->
+    <rect x="370" y="600" width="60" height="15" rx="5" fill="#e8517a" />
+    <path d="M 400,605 Q 320,570 340,620 Q 360,640 400,605 Z" fill="#d62d60" />
+    <path d="M 400,605 Q 480,570 460,620 Q 440,640 400,605 Z" fill="#d62d60" />
+    <path d="M 380,610 L 350,700 L 390,690 Z" fill="#9e1540" />
+    <path d="M 420,610 L 450,700 L 410,690 Z" fill="#9e1540" />
+  </g>
+
+  <!-- ROSES -->
+  <!-- CRITICAL: <g translate> places the anchor point. <g anim-flower> safely scales it from that exact 0,0 point -->
+  
+  <!-- Far Left Rose -->
+  <g transform="translate(240, 400)">
+    <g class="anim-flower" style="--s: 0.7; --d: 1.2s;"><use href="#master-rose"/></g>
+  </g>
+  
+  <!-- Far Right Rose -->
+  <g transform="translate(560, 400)">
+    <g class="anim-flower" style="--s: 0.7; --d: 1.4s;"><use href="#master-rose"/></g>
+  </g>
+  
+  <!-- Mid Left Rose -->
+  <g transform="translate(300, 480)">
+    <g class="anim-flower" style="--s: 0.85; --d: 1.6s;"><use href="#master-rose"/></g>
+  </g>
+  
+  <!-- Mid Right Rose -->
+  <g transform="translate(500, 480)">
+    <g class="anim-flower" style="--s: 0.85; --d: 1.8s;"><use href="#master-rose"/></g>
+  </g>
+
+  <!-- Center Queen Rose (Highest & Largest) -->
+  <g transform="translate(400, 320)">
+    <g class="anim-flower" style="--s: 1.3; --d: 2.2s;">
+      <!-- Extra center glow -->
+      <circle cx="0" cy="0" r="80" fill="rgba(232, 81, 122, 0.3)" filter="blur(15px)"/>
+      <use href="#master-rose"/>
     </g>
-  </svg>
-</div>
+  </g>
 
-<!-- Verse at bottom -->
+  <!-- Magic Filler Dust (Baby's Breath) -->
+  <g class="anim-flower" style="--s: 1; --d: 2.8s; transform-origin: 400px 400px;">
+    <circle cx="300" cy="300" r="5" fill="#fff" opacity="0.8"/>
+    <circle cx="280" cy="330" r="4" fill="#f8c4d5" opacity="0.9"/>
+    <circle cx="500" cy="300" r="5" fill="#fff" opacity="0.8"/>
+    <circle cx="520" cy="330" r="4" fill="#f8c4d5" opacity="0.9"/>
+    <circle cx="400" cy="220" r="6" fill="#fff" opacity="0.7"/>
+  </g>
+</svg>
+
 <div id="verse">
-  <p>"For every petal drawn, a thought of you."</p>
+  <p>"Unbreakable, unshifting, blooming endlessly for you."</p>
 </div>
 
 <script>
-// Heavenly Starfield
-const starsEl = document.getElementById('stars');
-for (let i = 0; i < 100; i++) {
-  const s = document.createElement('div');
-  s.className = 'star';
-  const size = Math.random() * 2 + 1;
-  s.style.width = size + 'px';
-  s.style.height = size + 'px';
-  s.style.left = Math.random() * 100 + 'vw';
-  s.style.top = Math.random() * 100 + 'vh';
-  s.style.animationDelay = Math.random() * 5 + 's';
-  s.style.animationDuration = Math.random() * 3 + 2 + 's';
-  starsEl.appendChild(s);
+// Generate background stars efficiently
+const starsBox = document.getElementById('stars-container');
+for(let i=0; i<80; i++) {
+  let star = document.createElement('div');
+  star.className = 'star';
+  let size = Math.random() * 2 + 1;
+  star.style.width = size + 'px';
+  star.style.height = size + 'px';
+  star.style.left = Math.random() * 100 + 'vw';
+  star.style.top = Math.random() * 100 + 'vh';
+  star.style.animationDelay = (Math.random() * 3) + 's';
+  star.style.animationDuration = (Math.random() * 2 + 2) + 's';
+  starsBox.appendChild(star);
 }
 
-// Falling Petals System (Safe 2D CSS)
-function spawnPetals() {
-  const colors = ['#e8517a', '#c21e56', '#ffb3c6', '#ff7b9c'];
-  for (let i = 0; i < 30; i++) {
-    setTimeout(() => {
-      const petal = document.createElement('div');
-      petal.className = 'falling-petal';
-      petal.style.left = Math.random() * 100 + 'vw';
-      petal.style.background = colors[Math.floor(Math.random() * colors.length)];
-      petal.style.animationDuration = Math.random() * 4 + 4 + 's';
-      petal.style.width = Math.random() * 8 + 10 + 'px';
-      petal.style.height = Math.random() * 8 + 10 + 'px';
-      document.body.appendChild(petal);
-      
-      // Cleanup
-      setTimeout(() => petal.remove(), 9000);
-    }, i * 150);
-  }
+// Generate organic falling petals safely using DOM elements
+function spawnPetal() {
+  const colors = ['#e8517a', '#f2638e', '#d62d60', '#ffb8cc'];
+  const petal = document.createElement('div');
+  petal.className = 'falling-petal';
+  
+  // Random start parameters
+  petal.style.left = (Math.random() * 100) + 'vw';
+  petal.style.background = colors[Math.floor(Math.random() * colors.length)];
+  petal.style.animationDuration = (Math.random() * 4 + 5) + 's'; // 5 to 9 seconds
+  
+  document.body.appendChild(petal);
+  
+  // Clean up DOM after fall
+  setTimeout(() => { petal.remove(); }, 10000);
 }
 
-// Master Control
-function beginMagic() {
+// Master trigger function
+function startMagic() {
   const btn = document.getElementById('start-btn');
   btn.style.opacity = '0';
   btn.style.pointerEvents = 'none';
 
-  // Add the class that triggers the CSS transitions on the SVG elements
-  document.getElementById('bouquet-svg').classList.add('bloom');
-  document.getElementById('glow-ring').classList.add('visible');
+  // 1. Activate SVG Bloom (Triggers all CSS variables)
+  document.body.classList.add('magic-active');
 
-  // Trigger Texts
+  // 2. Fade in Typography
+  setTimeout(() => { document.getElementById('t1').classList.add('show-text'); }, 2500);
+  setTimeout(() => { document.getElementById('t2').classList.add('show-text'); }, 3000);
+  setTimeout(() => { document.getElementById('t3').classList.add('show-text'); }, 4000);
+  setTimeout(() => { document.getElementById('verse').classList.add('show-text'); }, 5500);
+
+  // 3. Start gentle petal rain
   setTimeout(() => {
-    document.getElementById('tag').classList.add('show');
-    document.getElementById('headline').classList.add('show');
-  }, 3000);
-  
-  setTimeout(() => document.getElementById('sub').classList.add('show'), 4000);
-  setTimeout(() => document.getElementById('verse').classList.add('show'), 5500);
-
-  // Trigger Petal Rain
-  setTimeout(spawnPetals, 2000);
-  setInterval(spawnPetals, 8000); // Continuous soft rain
+    setInterval(spawnPetal, 400); // New petal every 400ms
+  }, 2000);
 }
 </script>
 </body>
