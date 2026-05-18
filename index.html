@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>For Kannu 🌸</title>
+
+  <style>
+    *{
+      margin:0;
+      padding:0;
+      box-sizing:border-box;
+    }
+
+    body{
+      height:100vh;
+      overflow:hidden;
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg,#ffdde1,#ee9ca7);
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      position:relative;
+    }
+
+    .container{
+      text-align:center;
+      z-index:2;
+    }
+
+    h1{
+      color:white;
+      font-size:4rem;
+      text-shadow:0 5px 15px rgba(0,0,0,0.2);
+      opacity:0;
+      transform:translateY(20px);
+      transition:1s ease;
+      margin-top:30px;
+    }
+
+    .show-text{
+      opacity:1;
+      transform:translateY(0);
+    }
+
+    .btn{
+      padding:18px 40px;
+      border:none;
+      border-radius:50px;
+      background:white;
+      color:#ff4f81;
+      font-size:1.3rem;
+      font-weight:bold;
+      cursor:pointer;
+      box-shadow:0 10px 25px rgba(0,0,0,0.15);
+      transition:0.3s ease;
+      position:relative;
+      overflow:hidden;
+    }
+
+    .btn:hover{
+      transform:scale(1.08);
+      background:#fff5f7;
+    }
+
+    .bouquet{
+      position:relative;
+      width:350px;
+      height:420px;
+      margin:auto;
+      display:none;
+      animation: bloom 2s ease forwards;
+    }
+
+    @keyframes bloom{
+      0%{
+        transform:scale(0.2) rotate(-10deg);
+        opacity:0;
+      }
+      100%{
+        transform:scale(1) rotate(0deg);
+        opacity:1;
+      }
+    }
+
+    .stem{
+      position:absolute;
+      width:8px;
+      background:#2e8b57;
+      bottom:0;
+      left:50%;
+      transform:translateX(-50%);
+      border-radius:10px;
+    }
+
+    .flower{
+      position:absolute;
+      width:90px;
+      height:90px;
+    }
+
+    .petal{
+      width:40px;
+      height:40px;
+      background:pink;
+      border-radius:50%;
+      position:absolute;
+      transform-origin:center;
+      box-shadow:0 0 10px rgba(255,255,255,0.6);
+    }
+
+    .center{
+      width:28px;
+      height:28px;
+      background:gold;
+      border-radius:50%;
+      position:absolute;
+      top:31px;
+      left:31px;
+      z-index:5;
+      box-shadow:0 0 12px rgba(255,215,0,0.9);
+    }
+
+    .wrap{
+      position:absolute;
+      bottom:0;
+      left:50%;
+      transform:translateX(-50%);
+      width:180px;
+      height:180px;
+      background:linear-gradient(135deg,#ff7eb3,#ff758c);
+      clip-path:polygon(50% 100%, 0 20%, 100% 20%);
+      opacity:0.9;
+      z-index:-1;
+    }
+
+    .heart{
+      position:absolute;
+      color:white;
+      font-size:22px;
+      animation: floatUp 6s linear infinite;
+      opacity:0.7;
+    }
+
+    @keyframes floatUp{
+      0%{
+        transform:translateY(0) scale(1);
+        opacity:0.8;
+      }
+      100%{
+        transform:translateY(-100vh) scale(1.8);
+        opacity:0;
+      }
+    }
+
+    .sparkle{
+      position:absolute;
+      width:8px;
+      height:8px;
+      background:white;
+      border-radius:50%;
+      animation:spark 2s infinite;
+    }
+
+    @keyframes spark{
+      0%,100%{
+        transform:scale(0.5);
+        opacity:0.4;
+      }
+      50%{
+        transform:scale(1.8);
+        opacity:1;
+      }
+    }
+
+    .message{
+      margin-top:20px;
+      color:white;
+      font-size:1.2rem;
+      opacity:0;
+      transition:1.5s ease;
+      text-shadow:0 3px 10px rgba(0,0,0,0.2);
+    }
+
+    .show-message{
+      opacity:1;
+    }
+
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+
+    <button class="btn" onclick="createMagic()">
+      Press Here ❤️
+    </button>
+
+    <div class="bouquet" id="bouquet">
+
+      <div class="wrap"></div>
+
+      <!-- Flowers -->
+
+      <div class="flower" style="top:40px; left:130px;">
+        <div class="petal" style="top:0; left:25px;"></div>
+        <div class="petal" style="top:25px; left:0;"></div>
+        <div class="petal" style="top:25px; left:50px;"></div>
+        <div class="petal" style="top:50px; left:25px;"></div>
+        <div class="petal" style="top:10px; left:10px;"></div>
+        <div class="petal" style="top:10px; left:40px;"></div>
+        <div class="petal" style="top:40px; left:10px;"></div>
+        <div class="petal" style="top:40px; left:40px;"></div>
+        <div class="center"></div>
+      </div>
+
+      <div class="flower" style="top:120px; left:50px;">
+        <div class="petal" style="background:#ff69b4; top:0; left:25px;"></div>
+        <div class="petal" style="background:#ff69b4; top:25px; left:0;"></div>
+        <div class="petal" style="background:#ff69b4; top:25px; left:50px;"></div>
+        <div class="petal" style="background:#ff69b4; top:50px; left:25px;"></div>
+        <div class="petal" style="background:#ff69b4; top:10px; left:10px;"></div>
+        <div class="petal" style="background:#ff69b4; top:10px; left:40px;"></div>
+        <div class="petal" style="background:#ff69b4; top:40px; left:10px;"></div>
+        <div class="petal" style="background:#ff69b4; top:40px; left:40px;"></div>
+        <div class="center"></div>
+      </div>
+
+      <div class="flower" style="top:120px; left:210px;">
+        <div class="petal" style="background:#ff85a2; top:0; left:25px;"></div>
+        <div class="petal" style="background:#ff85a2; top:25px; left:0;"></div>
+        <div class="petal" style="background:#ff85a2; top:25px; left:50px;"></div>
+        <div class="petal" style="background:#ff85a2; top:50px; left:25px;"></div>
+        <div class="petal" style="background:#ff85a2; top:10px; left:10px;"></div>
+        <div class="petal" style="background:#ff85a2; top:10px; left:40px;"></div>
+        <div class="petal" style="background:#ff85a2; top:40px; left:10px;"></div>
+        <div class="petal" style="background:#ff85a2; top:40px; left:40px;"></div>
+        <div class="center"></div>
+      </div>
+
+      <!-- stems -->
+
+      <div class="stem" style="height:240px; left:175px;"></div>
+      <div class="stem" style="height:180px; left:100px;"></div>
+      <div class="stem" style="height:180px; left:250px;"></div>
+
+    </div>
+
+    <h1 id="text">Yes Kannu 🌸</h1>
+
+    <div class="message" id="msg">
+      Every flower here blooms only for you ❤️
+    </div>
+
+  </div>
+
+  <script>
+
+    function createMagic(){
+
+      document.querySelector(".btn").style.display = "none";
+
+      const bouquet = document.getElementById("bouquet");
+      bouquet.style.display = "block";
+
+      setTimeout(() => {
+        document.getElementById("text").classList.add("show-text");
+        document.getElementById("msg").classList.add("show-message");
+      }, 1200);
+
+      // floating hearts
+      for(let i=0;i<40;i++){
+
+        let heart = document.createElement("div");
+        heart.className = "heart";
+        heart.innerHTML = "❤";
+
+        heart.style.left = Math.random()*100 + "vw";
+        heart.style.top = "100vh";
+        heart.style.fontSize = (15 + Math.random()*25) + "px";
+        heart.style.animationDuration = (3 + Math.random()*4) + "s";
+
+        document.body.appendChild(heart);
+
+        setTimeout(()=>{
+          heart.remove();
+        },7000);
+      }
+
+      // sparkles
+      for(let i=0;i<30;i++){
+
+        let sparkle = document.createElement("div");
+        sparkle.className = "sparkle";
+
+        sparkle.style.left = Math.random()*100 + "vw";
+        sparkle.style.top = Math.random()*100 + "vh";
+        sparkle.style.animationDelay = Math.random()*2 + "s";
+
+        document.body.appendChild(sparkle);
+      }
+    }
+
+  </script>
+
+</body>
+</html>
