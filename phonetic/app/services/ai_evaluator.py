@@ -15,31 +15,25 @@ from app.core.config import get_settings
 logger = logging.getLogger(__name__)
 
 
+class PronunciationRank(BaseModel):
+    rank: int = Field(description="1 for primary UK RP, 2 for secondary, etc.")
+    gujarati: str = Field(description="The Gujarati phonetic transcription")
+    ipa: str = Field(description="Strict Oxford British RP IPA")
+    notes: str = Field(description="Brief note on why this variant exists (e.g., 'Primary non-rhotic', 'Weak form')")
+
 class POSVariant(BaseModel):
-    pos: str = Field(description="Part of speech (e.g. 'noun', 'verb').")
-    ipa: str = Field(description="The standard IPA representation for this POS.")
-    gujarati: str = Field(description="The Gujarati phonetic spelling for this POS.")
+    pos: str = Field(description="Part of speech (e.g., 'noun', 'verb')")
+    ranked_pronunciations: list[PronunciationRank]
 
-
-class VerificationResult(BaseModel):
-    word: str
-    arpabet: list[str]
-    deterministic_gujarati: str
-    oxford_verified_gujarati: str = Field(
-        description="The Oxford-verified Gujarati phonetic transcription."
-    )
-    pos_variants: list[POSVariant] | None = Field(
-        default=None,
-        description="Populated if the word is a homograph with different pronunciations based on POS (e.g. project).",
-    )
-    phonetic_breakdown: str = Field(
-        description="A brief explanation of any corrections made to the deterministic output."
-    )
+class OxfordEvaluation(BaseModel):
+    is_homograph: bool = Field(description="True if the word has different pronunciations for different parts of speech")
+    pos_variants: list[POSVariant] = Field(description="List of POS forms and their 1-3 ranked British pronunciations")
+    phonetic_breakdown: str = Field(description="Explanation of the British RP transcription choices")
 
 
 async def evaluate_phonetics(
     word: str, arpabet: list[str], deterministic_gujarati: str
-) -> VerificationResult | None:
+) -> OxfordEvaluation | None:
     """Evaluate the deterministic phonetics using Gemini.
 
     Returns `None` if the API key is missing or the call fails, allowing
@@ -62,9 +56,9 @@ async def evaluate_phonetics(
     Deterministic Gujarati: {deterministic_gujarati}
 
     Your task:
-    1. Verify if '{deterministic_gujarati}' matches the standard Oxford English Dictionary (RP/AmE) pronunciation.
-    2. If it is perfect, return it in `oxford_verified_gujarati`. If it needs a minor tweak (like replacing a schwa or adjusting a matra), return the corrected version.
-    3. If this word is a homograph (e.g. 'project' noun vs verb), populate `pos_variants` with the different ways it can be pronounced.
+    1. For every applicable Part of Speech (POS) for this word, provide 1 to 3 ranked British RP pronunciations (e.g., rank 1 = primary, rank 2 = secondary/weak form).
+    2. Drop American English pronunciations entirely. Focus strictly on Oxford British RP (non-rhotic).
+    3. Return the exact Gujarati phonetic spellings and the strict IPA for each rank.
     4. Provide a brief `phonetic_breakdown` explaining your logic.
 
     TYPOGRAPHY RULES:
@@ -75,17 +69,12 @@ async def evaluate_phonetics(
     """
 
     try:
-        # Use asyncio.to_thread because the google-genai client doesn't currently 
-        # expose first-class async functions for generate_content natively in all contexts.
-        # Actually, genai.Client has .aio if we want async, but let's just use synchronous 
-        # generate_content and wrap it to be safe. Wait, `client.aio.models.generate_content` exists in google-genai 0.1+.
-        # We will use `client.aio.models.generate_content`.
         response = await client.aio.models.generate_content(
             model="gemini-2.5-flash",
             contents=prompt,
             config=types.GenerateContentConfig(
                 response_mime_type="application/json",
-                response_schema=VerificationResult,
+                response_schema=OxfordEvaluation,
                 temperature=0.0,  # Keep it deterministic
             ),
         )
