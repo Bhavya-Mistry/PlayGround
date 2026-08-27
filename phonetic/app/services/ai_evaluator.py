@@ -48,29 +48,23 @@ async def evaluate_phonetics(
     client = genai.Client(api_key=settings.GEMINI_API_KEY)
 
     prompt = f"""
-    You are an expert Oxford/RP English to Gujarati phonetic evaluator.
-    I have generated a deterministic phonetic transcription for an English word.
-
     Word: {word}
     ARPAbet tokens: {arpabet}
     Deterministic Gujarati: {deterministic_gujarati}
 
-    Your task:
-    1. For every applicable Part of Speech (POS) for this word, provide 1 to 3 ranked British RP pronunciations (e.g., rank 1 = primary, rank 2 = secondary/weak form).
-    2. Drop American English pronunciations entirely. Focus strictly on Oxford British RP (non-rhotic).
-    3. Return the exact Gujarati phonetic spellings and the strict IPA for each rank.
-    4. Provide a brief `phonetic_breakdown` explaining your logic.
-
-    TYPOGRAPHY RULES:
-    1. Do not form conjuncts (using halant '્') across syllable boundaries or common English suffixes.
-    2. For suffixes like -ment, -ness, -ful, and -less, the preceding consonant MUST be a full letter. 
-    3. Example: 'arrangement' must be 'અરેઇન્જમન્ટ', NEVER 'અરેઇન્જ્મન્ટ'. 
-    4. Example: 'statement' must be 'સ્ટેટમન્ટ', NEVER 'સ્ટેટ્મન્ટ'.
+    You are a strict Oxford English Phonetician. Evaluate the deterministic Gujarati transcription and provide 100% accurate British English (Modern RP) equivalents.
+    RULES:
+    1. BRITISH RP ONLY: Strictly exclude American rhotic /r/ sounds or /æ/ shifting.
+    2. FORCE MULTIPLE VARIANTS: You MUST provide at least 2 (up to 3) ranked pronunciations for EVERY Part of Speech. 
+       - Rank 1: The primary Oxford UK RP dictionary standard.
+       - Rank 2/3: If no distinct secondary dictionary pronunciation exists, you MUST provide a common British connected-speech form (e.g., using a glottal stop /ʔ/, intrusive 'r', or weak forms). Explain this in the `notes`.
+    3. EXHAUSTIVE POS: Identify all major grammatical forms of the word (e.g., Noun, Verb, Adjective). Provide a separate `POSVariant` block for EACH one, even if the pronunciation is identical. Set `is_homograph` to true ONLY if the pronunciation differs across these blocks.
+    4. TYPOGRAPHY: Do not form conjuncts (halant '્') across syllable boundaries or suffixes (e.g., 'statement' is સ્ટેટમન્ટ, NEVER સ્ટેટ્મન્ટ). Use Candra matras (ૅ for /æ/ and ૉ for /ɒ/ or /ɔː/).
     """
 
     try:
         response = await client.aio.models.generate_content(
-            model="gemini-2.5-flash",
+            model="gemini-3.6-flash",
             contents=prompt,
             config=types.GenerateContentConfig(
                 response_mime_type="application/json",
