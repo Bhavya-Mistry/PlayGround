@@ -15,9 +15,7 @@ from mcp.server.mcpserver import MCPServer
 
 from app.api.routes import router as rest_router
 from app.core.config import get_settings
-from app.core.exceptions import PhoneticServerError, WordNotFoundError
-from app.services.dictionary_api import fetch_ipa
-from app.services.phonetics import ipa_to_gujarati
+from app.services.pipeline import run_phonetic_pipeline
 
 logger = logging.getLogger(__name__)
 
@@ -30,43 +28,36 @@ settings = get_settings()
 mcp = MCPServer(
     name="GujaratiPhoneticsServer",
     instructions=(
-        "This server converts English words to Gujarati phonetic script. "
-        "Use the get_gujarati_pronunciation tool to get the deterministic "
-        "Gujarati rendering of an English word's pronunciation."
+        "This server converts English words to Gujarati phonetic script "
+        "using a 3-step pipeline (G2P extraction -> Deterministic mapping -> "
+        "Oxford Verification). Use get_verified_gujarati_pronunciation."
     ),
 )
 
 
 @mcp.tool(
-    name="get_gujarati_pronunciation",
+    name="get_verified_gujarati_pronunciation",
     description=(
-        "Given an English word, fetches its IPA transcription from the Free "
-        "Dictionary API and converts it to deterministic Gujarati phonetic "
-        "script.  Returns a JSON object with 'word', 'ipa', and 'gujarati' "
-        "keys."
+        "Given an English word, runs the phonetic pipeline to generate "
+        "ARPAbet transcriptions, deterministic Gujarati, and Oxford-verified "
+        "Gujarati. Returns a structured JSON result including POS variants if applicable."
     ),
 )
-async def get_gujarati_pronunciation(word: str) -> dict[str, str]:
-    """Chain dictionary lookup and phonetic conversion.
+async def get_verified_gujarati_pronunciation(word: str) -> dict:
+    """Run the 3-step pipeline.
 
     Args:
         word: The English word to pronounce.
 
     Returns:
-        A dict with ``word``, ``ipa``, and ``gujarati`` fields.
+        A dict representation of the PipelineResult.
     """
     try:
-        ipa = await fetch_ipa(word)
-    except WordNotFoundError:
-        return {"error": f"'{word}' was not found in the dictionary."}
-    except PhoneticServerError as exc:
-        return {"error": exc.message}
-
-    gujarati = ipa_to_gujarati(ipa)
-    logger.info(
-        "MCP tool: '%s' → IPA '%s' → Gujarati '%s'", word, ipa, gujarati
-    )
-    return {"word": word, "ipa": ipa, "gujarati": gujarati}
+        result = await run_phonetic_pipeline(word)
+        return result.model_dump()
+    except Exception as exc:
+        logger.exception("Error in pipeline for '%s'", word)
+        return {"error": str(exc)}
 
 
 # ── FastAPI application ──────────────────────────────────────────────────

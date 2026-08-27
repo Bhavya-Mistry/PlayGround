@@ -3,61 +3,45 @@
 import logging
 
 from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
 
-from app.core.exceptions import PhoneticServerError, WordNotFoundError
-from app.services.dictionary_api import fetch_ipa
-from app.services.phonetics import ipa_to_gujarati
+from app.core.exceptions import PhoneticServerError, PhoneticDataMissingError
+from app.services.pipeline import run_phonetic_pipeline, PipelineResult
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(tags=["Pronunciation"])
 
-
-# ── Response schema ───────────────────────────────────────────────────────
-
-
-class PronunciationResponse(BaseModel):
-    """JSON shape returned by the /pronounce endpoint."""
-
-    word: str
-    ipa: str
-    gujarati: str
-
-
 # ── Endpoint ──────────────────────────────────────────────────────────────
-
 
 @router.get(
     "/pronounce/{word}",
-    response_model=PronunciationResponse,
-    summary="Get Gujarati pronunciation for an English word",
+    response_model=PipelineResult,
+    summary="Get verified Gujarati pronunciation for an English word",
     responses={
-        404: {"description": "Word not found in the dictionary."},
-        502: {"description": "Dictionary API error."},
+        404: {"description": "Phonetic data not available."},
+        502: {"description": "Server error."},
     },
 )
-async def pronounce(word: str) -> PronunciationResponse:
-    """Look up *word* in the Free Dictionary API and return its Gujarati
-    phonetic transcription.
+async def pronounce(word: str) -> PipelineResult:
+    """Run the 3-step phonetic pipeline (Extraction -> Mapping -> AI Eval).
 
     Args:
         word: The English word to pronounce.
 
     Returns:
-        A ``PronunciationResponse`` containing the word, IPA, and Gujarati.
+        A ``PipelineResult`` containing the full phonetic breakdown.
     """
     try:
-        ipa = await fetch_ipa(word)
-    except WordNotFoundError:
+        result = await run_phonetic_pipeline(word)
+        return result
+    except PhoneticDataMissingError as exc:
         raise HTTPException(
             status_code=404,
-            detail=f"'{word}' was not found in the dictionary.",
+            detail=exc.message,
         )
     except PhoneticServerError as exc:
-        logger.exception("Dictionary API error for '%s'", word)
+        logger.exception("Phonetic engine error for '%s'", word)
         raise HTTPException(status_code=502, detail=exc.message)
-
-    gujarati = ipa_to_gujarati(ipa)
-    logger.info("Pronounced '%s' → IPA '%s' → Gujarati '%s'", word, ipa, gujarati)
-    return PronunciationResponse(word=word, ipa=ipa, gujarati=gujarati)
+    except Exception as exc:
+        logger.exception("Unexpected error in pipeline for '%s'", word)
+        raise HTTPException(status_code=500, detail="Internal server error")
