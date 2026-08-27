@@ -7,6 +7,7 @@ import logging
 import time
 from pydantic import BaseModel
 
+from app.core.config import get_settings
 from app.services.g2p_service import get_phonemes
 from app.services.phonetics import arpabet_to_gujarati
 from app.services.ai_evaluator import evaluate_phonetics, VerificationResult
@@ -38,6 +39,7 @@ async def run_phonetic_pipeline(word: str) -> PipelineResult:
     word = word.strip().lower()
     logger.info("--- Starting Pipeline for '%s' ---", word)
     times = {}
+    settings = get_settings()
 
     # ---------------------------------------------------------
     # Step 1: Phoneme Extraction (g2p_en)
@@ -58,6 +60,18 @@ async def run_phonetic_pipeline(word: str) -> PipelineResult:
     # ---------------------------------------------------------
     # Step 3: Oxford Evaluation (Gemini)
     # ---------------------------------------------------------
+    # Fast fallback: skip Gemini call if key is invalid or placeholder
+    if not settings.GEMINI_API_KEY or settings.GEMINI_API_KEY == "your-gemini-api-key-here":
+        logger.warning("Fast fallback: API key invalid/missing. Skipping Oxford eval.")
+        return PipelineResult(
+            word=word,
+            arpabet=arpabet,
+            deterministic_gujarati=deterministic_gujarati,
+            oxford_verified_gujarati=deterministic_gujarati,
+            phonetic_breakdown="Offline fallback mode active. API key not configured.",
+            execution_times=times,
+        )
+
     t0 = time.perf_counter()
     eval_result: VerificationResult | None = await evaluate_phonetics(
         word=word,
@@ -80,7 +94,7 @@ async def run_phonetic_pipeline(word: str) -> PipelineResult:
             execution_times=times,
         )
     else:
-        # Fallback if Gemini is unavailable or errored out
+        # Fallback if Gemini errored out
         logger.warning("Falling back to deterministic output for '%s'", word)
         return PipelineResult(
             word=word,
