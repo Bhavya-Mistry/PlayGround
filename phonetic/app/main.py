@@ -86,11 +86,16 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+from fastapi.staticfiles import StaticFiles
+
 # Mount REST routes.
 app.include_router(rest_router)
 
 # Mount the MCP server at /mcp (SSE transport).
 app.mount("/mcp", mcp.streamable_http_app())
+
+# Mount the frontend UI at the root
+app.mount("/", StaticFiles(directory="app/static", html=True), name="static")
 
 # ── Run directly ──────────────────────────────────────────────────────────
 
