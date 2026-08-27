@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gujarati Phonetics Converter</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <h1>Gujarati Phonetics</h1>
+      <p>Oxford RP Pronunciation & Transcription</p>
+    </header>
+
+    <div class="search-box">
+      <input type="text" id="searchInput" class="search-input" placeholder="Type an English word (e.g. water, project)..." autocomplete="off" />
+      <button id="searchBtn" class="search-btn">Transcribe</button>
+    </div>
+
+    <div id="loadingIndicator" class="loading">Analyzing phonetics...</div>
+    <div id="errorMessage" class="error-message"></div>
+
+    <div id="resultsContainer" class="results-container">
+      <!-- Variants will be injected here -->
+      <div id="variantsContainer"></div>
+      
+      <!-- Breakdown Card -->
+      <div id="breakdownCard" class="card breakdown-card" style="display: none;">
+        <h3>Phonetic Breakdown</h3>
+        <p id="breakdownText"></p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const searchInput = document.getElementById('searchInput');
+    const searchBtn = document.getElementById('searchBtn');
+    const resultsContainer = document.getElementById('resultsContainer');
+    const variantsContainer = document.getElementById('variantsContainer');
+    const loadingIndicator = document.getElementById('loadingIndicator');
+    const errorMessage = document.getElementById('errorMessage');
+    const breakdownCard = document.getElementById('breakdownCard');
+    const breakdownText = document.getElementById('breakdownText');
+
+    searchBtn.addEventListener('click', performSearch);
+    searchInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') performSearch();
+    });
+
+    async function performSearch() {
+      const word = searchInput.value.trim();
+      if (!word) return;
+
+      // Reset UI
+      resultsContainer.classList.remove('visible');
+      errorMessage.style.display = 'none';
+      variantsContainer.innerHTML = '';
+      breakdownCard.style.display = 'none';
+      loadingIndicator.style.display = 'block';
+
+      try {
+        const response = await fetch(`/pronounce/${encodeURIComponent(word)}`);
+        
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.detail || 'Failed to fetch pronunciation');
+        }
+
+        const data = await response.json();
+        renderResults(data);
+      } catch (error) {
+        errorMessage.textContent = error.message;
+        errorMessage.style.display = 'block';
+      } finally {
+        loadingIndicator.style.display = 'none';
+      }
+    }
+
+    function renderResults(data) {
+      if (data.pos_variants && data.pos_variants.length > 0) {
+        data.pos_variants.forEach(variant => {
+          const card = document.createElement('div');
+          card.className = 'card';
+          card.style.marginBottom = '20px';
+
+          const posTag = document.createElement('span');
+          posTag.className = 'pos-tag';
+          posTag.textContent = variant.pos;
+          card.appendChild(posTag);
+
+          variant.ranked_pronunciations.forEach(pronunciation => {
+            const item = document.createElement('div');
+            item.className = 'pronunciation-item';
+
+            item.innerHTML = `
+              <div class="rank-badge">Rank ${pronunciation.rank}</div>
+              <div class="gujarati-text">${pronunciation.gujarati}</div>
+              <div class="ipa-text">${pronunciation.ipa}</div>
+              <div class="notes-text">${pronunciation.notes}</div>
+            `;
+            card.appendChild(item);
+          });
+
+          variantsContainer.appendChild(card);
+        });
+      }
+
+      if (data.phonetic_breakdown) {
+        breakdownText.textContent = data.phonetic_breakdown;
+        breakdownCard.style.display = 'block';
+      }
+
+      // Trigger fade in
+      setTimeout(() => {
+        resultsContainer.classList.add('visible');
+      }, 50);
+    }
+  </script>
+</body>
+</html>
