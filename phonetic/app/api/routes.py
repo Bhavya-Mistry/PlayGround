@@ -45,3 +45,36 @@ async def pronounce(word: str) -> PipelineResult:
     except Exception as exc:
         logger.exception("Unexpected error in pipeline for '%s'", word)
         raise HTTPException(status_code=500, detail="Internal server error")
+
+
+from pydantic import BaseModel
+from app.core.db import save_feedback
+
+class FeedbackRequest(BaseModel):
+    word: str
+    pos: str
+    original_options: list[dict]
+    selected_gujarati: str
+    selected_ipa: str
+
+@router.post(
+    "/feedback",
+    summary="Submit user feedback for pronunciation ranking",
+    responses={
+        200: {"description": "Feedback successfully recorded."},
+    },
+)
+async def submit_feedback(request: FeedbackRequest):
+    """Save user feedback into the SQLite database for RLHF."""
+    try:
+        save_feedback(
+            word=request.word,
+            pos=request.pos,
+            original_options=request.original_options,
+            selected_gujarati=request.selected_gujarati,
+            selected_ipa=request.selected_ipa
+        )
+        return {"status": "success", "message": "Feedback recorded."}
+    except Exception as exc:
+        logger.exception("Failed to save feedback for '%s'", request.word)
+        raise HTTPException(status_code=500, detail="Internal server error saving feedback")

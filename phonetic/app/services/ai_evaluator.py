@@ -11,6 +11,7 @@ from google import genai
 from google.genai import types
 
 from app.core.config import get_settings
+from app.core.db import get_recent_feedback
 
 logger = logging.getLogger(__name__)
 
@@ -46,12 +47,26 @@ async def evaluate_phonetics(
 
     logger.info("Starting Oxford evaluation for '%s'...", word)
     client = genai.Client(api_key=settings.GEMINI_API_KEY)
+    
+    # Retrieve RLHF Feedback for RAG
+    recent_feedback = get_recent_feedback(limit=5)
+    feedback_context = ""
+    if recent_feedback:
+        feedback_context = "USER APPROVED FEEDBACK EXAMPLES:\n"
+        for fb in recent_feedback:
+            feedback_context += (
+                f"- Word: {fb['word']} (POS: {fb['pos']})\n"
+                f"  Approved Rank 1: {fb['selected_gujarati']} ({fb['selected_ipa']})\n"
+                f"  Rejected Options: {fb['original_options']}\n"
+            )
+        feedback_context += "\nCRITICAL: You MUST align your stylistic choices (especially matras and halants) with the user-approved feedback examples above.\n"
 
     prompt = f"""
     Word: {word}
     ARPAbet tokens: {arpabet}
     Deterministic Gujarati: {deterministic_gujarati}
 
+    {feedback_context}
     You are a strict Oxford English Phonetician. Evaluate the deterministic Gujarati transcription and provide 100% accurate British English (Modern RP) equivalents.
     RULES:
     1. BRITISH RP ONLY: Strictly exclude American rhotic /r/ sounds or /æ/ shifting.

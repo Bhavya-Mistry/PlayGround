@@ -253,3 +253,37 @@ body {
   font-weight: 500;
   display: none;
 }
+
+/* Feedback Button */
+.best-btn {
+  margin-top: 12px;
+  padding: 6px 12px;
+  background: transparent;
+  border: 1px solid var(--accent-color);
+  color: var(--accent-text);
+  border-radius: 20px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  align-self: flex-start;
+}
+
+.best-btn:hover {
+  background: var(--accent-color);
+  color: #fff;
+}
+
+.pronunciation-item.selected {
+  border-color: #a3d9b0;
+  background: rgba(163, 217, 176, 0.15);
+  box-shadow: 0 0 15px rgba(163, 217, 176, 0.4);
+}
+
+.best-btn.selected-btn {
+  background: #a3d9b0;
+  color: #2c5936;
+  border-color: #a3d9b0;
+  cursor: default;
+}

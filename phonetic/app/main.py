@@ -63,6 +63,8 @@ async def get_verified_gujarati_pronunciation(word: str) -> dict:
 # ── FastAPI application ──────────────────────────────────────────────────
 
 
+from app.core.db import init_db
+
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     """Application lifespan — configure logging on startup."""
@@ -71,6 +73,11 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         format="%(asctime)s | %(name)s | %(levelname)s | %(message)s",
     )
     logger.info("Gujarati Phonetics Server starting up 🚀")
+    
+    # Initialize the SQLite database
+    init_db()
+    logger.info("Database initialized.")
+    
     yield
     logger.info("Gujarati Phonetics Server shutting down 🛑")
 
