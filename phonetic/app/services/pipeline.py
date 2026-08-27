@@ -5,12 +5,12 @@ Coordinates ARPAbet extraction -> Deterministic mapping -> AI Verification.
 
 import logging
 import time
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from app.core.config import get_settings
 from app.services.g2p_service import get_phonemes
 from app.services.phonetics import arpabet_to_gujarati
-from app.services.ai_evaluator import evaluate_phonetics, VerificationResult
+from app.services.ai_evaluator import evaluate_phonetics, OxfordEvaluation, POSVariant, PronunciationRank
 
 logger = logging.getLogger(__name__)
 
@@ -20,8 +20,8 @@ class PipelineResult(BaseModel):
     word: str
     arpabet: list[str]
     deterministic_gujarati: str
-    oxford_verified_gujarati: str
-    pos_variants: list[dict] | None = None
+    is_homograph: bool
+    pos_variants: list[dict]
     phonetic_breakdown: str | None = None
     execution_times: dict[str, float]
 
@@ -67,13 +67,26 @@ async def run_phonetic_pipeline(word: str) -> PipelineResult:
             word=word,
             arpabet=arpabet,
             deterministic_gujarati=deterministic_gujarati,
-            oxford_verified_gujarati=deterministic_gujarati,
+            is_homograph=False,
+            pos_variants=[
+                {
+                    "pos": "unknown",
+                    "ranked_pronunciations": [
+                        {
+                            "rank": 1,
+                            "gujarati": deterministic_gujarati,
+                            "ipa": "Offline Fallback",
+                            "notes": "Generated offline without Oxford verification."
+                        }
+                    ]
+                }
+            ],
             phonetic_breakdown="Offline fallback mode active. API key not configured.",
             execution_times=times,
         )
 
     t0 = time.perf_counter()
-    eval_result: VerificationResult | None = await evaluate_phonetics(
+    eval_result: OxfordEvaluation | None = await evaluate_phonetics(
         word=word,
         arpabet=arpabet,
         deterministic_gujarati=deterministic_gujarati,
@@ -88,8 +101,8 @@ async def run_phonetic_pipeline(word: str) -> PipelineResult:
             word=word,
             arpabet=arpabet,
             deterministic_gujarati=deterministic_gujarati,
-            oxford_verified_gujarati=eval_result.oxford_verified_gujarati,
-            pos_variants=[v.model_dump() for v in eval_result.pos_variants] if eval_result.pos_variants else None,
+            is_homograph=eval_result.is_homograph,
+            pos_variants=[v.model_dump() for v in eval_result.pos_variants],
             phonetic_breakdown=eval_result.phonetic_breakdown,
             execution_times=times,
         )
@@ -100,7 +113,20 @@ async def run_phonetic_pipeline(word: str) -> PipelineResult:
             word=word,
             arpabet=arpabet,
             deterministic_gujarati=deterministic_gujarati,
-            oxford_verified_gujarati=deterministic_gujarati,  # Fallback
+            is_homograph=False,
+            pos_variants=[
+                {
+                    "pos": "unknown",
+                    "ranked_pronunciations": [
+                        {
+                            "rank": 1,
+                            "gujarati": deterministic_gujarati,
+                            "ipa": "Offline Fallback",
+                            "notes": "Generated offline without Oxford verification."
+                        }
+                    ]
+                }
+            ],
             phonetic_breakdown="Offline fallback mode active. No Oxford verification performed.",
             execution_times=times,
         )
