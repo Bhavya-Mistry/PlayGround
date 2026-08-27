@@ -66,6 +66,12 @@ async def evaluate_phonetics(
     2. If it is perfect, return it in `oxford_verified_gujarati`. If it needs a minor tweak (like replacing a schwa or adjusting a matra), return the corrected version.
     3. If this word is a homograph (e.g. 'project' noun vs verb), populate `pos_variants` with the different ways it can be pronounced.
     4. Provide a brief `phonetic_breakdown` explaining your logic.
+
+    TYPOGRAPHY RULES:
+    1. Do not form conjuncts (using halant '્') across syllable boundaries or common English suffixes.
+    2. For suffixes like -ment, -ness, -ful, and -less, the preceding consonant MUST be a full letter. 
+    3. Example: 'arrangement' must be 'અરેઇન્જમન્ટ', NEVER 'અરેઇન્જ્મન્ટ'. 
+    4. Example: 'statement' must be 'સ્ટેટમન્ટ', NEVER 'સ્ટેટ્મન્ટ'.
     """
 
     try:
@@ -80,7 +86,7 @@ async def evaluate_phonetics(
             config=types.GenerateContentConfig(
                 response_mime_type="application/json",
                 response_schema=VerificationResult,
-                temperature=0.1,  # Keep it deterministic
+                temperature=0.0,  # Keep it deterministic
             ),
         )
 

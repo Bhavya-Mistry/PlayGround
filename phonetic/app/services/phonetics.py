@@ -110,6 +110,9 @@ def arpabet_to_gujarati(phonemes: list[str]) -> str:
     result: list[str] = []
     last_was_consonant = False
 
+    # Consonants that often start common English suffixes (-ment, -ness, -ful, -less, -ly)
+    SUFFIX_STARTS = {"M", "N", "F", "L"}
+
     logger.debug("Converting ARPAbet: %s", phonemes)
 
     for raw_phoneme in phonemes:
@@ -119,7 +122,8 @@ def arpabet_to_gujarati(phonemes: list[str]) -> str:
         if phoneme in CONSONANTS:
             # If the previous token was also a consonant, insert a halant (્)
             # to form a conjunct before appending the new consonant.
-            if last_was_consonant:
+            # EXCEPTION: Prevent conjuncts across suffix boundaries.
+            if last_was_consonant and phoneme not in SUFFIX_STARTS:
                 result.append("્")
             result.append(CONSONANTS[phoneme])
             last_was_consonant = True
