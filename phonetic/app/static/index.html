@@ -13,9 +13,11 @@
       <p>Oxford RP Pronunciation & Transcription</p>
     </header>
 
-    <div class="search-box">
-      <input type="text" id="searchInput" class="search-input" placeholder="Type an English word (e.g. water, project)..." autocomplete="off" />
-      <button id="searchBtn" class="search-btn">Transcribe</button>
+    <div class="search-wrapper">
+      <div class="search-box">
+        <input type="text" id="searchInput" class="search-input" placeholder="Type an English word (e.g. water, project)..." autocomplete="off" />
+        <button id="searchBtn" class="search-btn">Transcribe</button>
+      </div>
     </div>
 
     <div id="loadingIndicator" class="loading">Analyzing phonetics...</div>
@@ -23,10 +25,10 @@
 
     <div id="resultsContainer" class="results-container">
       <!-- Variants will be injected here -->
-      <div id="variantsContainer"></div>
+      <div id="variantsContainer" style="display: contents;"></div>
       
       <!-- Breakdown Card -->
-      <div id="breakdownCard" class="card breakdown-card" style="display: none;">
+      <div id="breakdownCard" class="card breakdown-card" style="display: none; grid-column: 1 / -1;">
         <h3>Phonetic Breakdown</h3>
         <p id="breakdownText"></p>
       </div>
@@ -82,12 +84,14 @@
         data.pos_variants.forEach(variant => {
           const card = document.createElement('div');
           card.className = 'card';
-          card.style.marginBottom = '20px';
 
           const posTag = document.createElement('span');
           posTag.className = 'pos-tag';
           posTag.textContent = variant.pos;
           card.appendChild(posTag);
+          
+          const ranksGrid = document.createElement('div');
+          ranksGrid.className = 'ranks-grid';
 
           variant.ranked_pronunciations.forEach(pronunciation => {
             const item = document.createElement('div');
@@ -99,9 +103,10 @@
               <div class="ipa-text">${pronunciation.ipa}</div>
               <div class="notes-text">${pronunciation.notes}</div>
             `;
-            card.appendChild(item);
+            ranksGrid.appendChild(item);
           });
-
+          
+          card.appendChild(ranksGrid);
           variantsContainer.appendChild(card);
         });
       }
